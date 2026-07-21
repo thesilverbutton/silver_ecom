@@ -19,7 +19,6 @@ interface VariantSelectorProps {
 function VariantSelector({ label, options, selected, onChange, className }: VariantSelectorProps) {
   return (
     <div className={cn("", className)}>
-      <p className="mb-2 text-sm font-medium">{label}</p>
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={label}>
         {options.map((option) => (
           <button

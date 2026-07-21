@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { getProducts, type ProductFilter } from "@/services/product.service";
+import Link from "next/link";
+import { getProducts, searchProducts, type ProductFilter } from "@/services/product.service";
 import { getAllCategories } from "@/services/category.service";
-import { Container } from "@/components/layout/section";
 import { ProductCard } from "@/components/product/product-card";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { EmptyState } from "@/components/layout/empty-state";
 import { ShopFilters } from "./filters";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Shop All",
@@ -26,6 +27,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const minPrice = params.minPrice ? Number(params.minPrice) : undefined;
   const maxPrice = params.maxPrice ? Number(params.maxPrice) : undefined;
   const inStock = params.inStock === "true";
+  const searchQuery = (params.q as string) || "";
 
   const filter: ProductFilter = {};
   if (gender) filter.gender = gender;
@@ -42,7 +44,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     if (cat) filter.categoryId = String(cat._id);
   }
 
-  const result = await getProducts(filter, { page, limit: 24, sort });
+  const result = searchQuery.trim().length >= 2
+    ? { items: await searchProducts(searchQuery, 24), total: 0, page: 1, totalPages: 1 }
+    : await getProducts(filter, { page, limit: 24, sort });
   const categories = await getAllCategories();
 
   // Serialize for client component
@@ -54,27 +58,42 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   }));
 
   return (
-    <Container className="py-8">
+    <main className="mx-auto max-w-[1280px] px-5 py-8 md:px-16 md:py-12">
+      {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Shop" }]} />
 
-      <div className="mt-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Shop All</h1>
-        <p className="text-sm text-muted-foreground">{result.total} products</p>
+      {/* Page Header */}
+      <div className="mb-12 mt-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="font-[family-name:var(--font-serif)] text-2xl font-semibold text-foreground md:text-3xl">
+            {searchQuery ? `Results for "${searchQuery}"` : "All Products"}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {searchQuery ? `${result.items.length} items found` : `${result.total} items`}
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <button className="flex items-center gap-2 rounded border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-foreground">
+            <span>Sort By</span>
+            <ChevronRight className="h-3.5 w-3.5 rotate-90" />
+          </button>
+        </div>
       </div>
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-[240px_1fr]">
-        {/* Sidebar filters */}
-        <aside className="hidden lg:block">
+      {/* Main Grid: Sidebar + Products */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+        {/* Left Sidebar Filters */}
+        <aside className="hidden pr-8 md:col-span-3 md:block">
           <ShopFilters categories={serializedCategories} />
         </aside>
 
-        {/* Product grid */}
-        <div>
+        {/* Product Grid */}
+        <div className="col-span-1 md:col-span-9">
           {result.items.length === 0 ? (
             <EmptyState title="No products found" description="Try adjusting your filters." />
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-3">
                 {result.items.map((product: Record<string, unknown>) => (
                   <ProductCard
                     key={String(product._id)}
@@ -95,26 +114,57 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 ))}
               </div>
 
+              {/* Pagination */}
               {result.totalPages > 1 && (
-                <div className="mt-8 flex justify-center">
-                  <PaginationLink currentPage={result.page} totalPages={result.totalPages} />
+                <div className="mt-20 flex items-center justify-center gap-4">
+                  <Link
+                    href={page > 1 ? `?page=${page - 1}` : "#"}
+                    className="flex items-center justify-center p-2 text-muted-foreground transition-colors hover:text-foreground"
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </Link>
+                  <div className="flex items-center gap-6 text-sm font-medium">
+                    {Array.from({ length: Math.min(result.totalPages, 5) }, (_, i) => i + 1).map(
+                      (p) => (
+                        <Link
+                          key={p}
+                          href={`?page=${p}`}
+                          className={
+                            p === page
+                              ? "border-b border-foreground px-1 font-semibold text-foreground"
+                              : "px-1 text-muted-foreground transition-colors hover:text-foreground"
+                          }
+                        >
+                          {p}
+                        </Link>
+                      ),
+                    )}
+                    {result.totalPages > 5 && (
+                      <>
+                        <span className="text-muted-foreground">...</span>
+                        <Link
+                          href={`?page=${result.totalPages}`}
+                          className="px-1 text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          {result.totalPages}
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                  <Link
+                    href={page < result.totalPages ? `?page=${page + 1}` : "#"}
+                    className="flex items-center justify-center p-2 text-muted-foreground transition-colors hover:text-foreground"
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </Link>
                 </div>
               )}
             </>
           )}
         </div>
       </div>
-    </Container>
-  );
-}
-
-function PaginationLink({ currentPage, totalPages }: { currentPage: number; totalPages: number }) {
-  // Server component — render links for pagination (client Pagination component used in Phase 4)
-  return (
-    <div className="flex items-center gap-2 text-sm">
-      <span className="text-muted-foreground">
-        Page {currentPage} of {totalPages}
-      </span>
-    </div>
+    </main>
   );
 }

@@ -1,52 +1,52 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Search, Heart, ShoppingBag, User } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Home, LayoutGrid, Heart, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface MobileNavProps {
-  cartCount?: number;
-  className?: string;
-}
+function MobileNav() {
+  const pathname = usePathname();
 
-function MobileNav({ cartCount = 0, className }: MobileNavProps) {
+  const tabs = [
+    { href: "/", icon: Home, label: "Home", match: (p: string) => p === "/" },
+    { href: "/shop", icon: LayoutGrid, label: "Shop", match: (p: string) => p.startsWith("/shop") || p.startsWith("/men") || p.startsWith("/women") || p.startsWith("/new-arrivals") },
+    { href: "/account/wishlist", icon: Heart, label: "Wishlist", match: (p: string) => p.includes("/wishlist") },
+    { href: "/account", icon: User, label: "Account", match: (p: string) => p === "/account" || p.startsWith("/account/orders") },
+  ];
+
   return (
     <nav
-      className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur md:hidden",
-        className,
-      )}
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-md md:hidden"
       aria-label="Mobile navigation"
     >
-      <div className="flex h-16 items-center justify-around px-4">
-        <MobileNavLink href="/" icon={<Home className="h-5 w-5" />} label="Home" />
-        <MobileNavLink href="/shop" icon={<Search className="h-5 w-5" />} label="Shop" />
-        <MobileNavLink href="/account/wishlist" icon={<Heart className="h-5 w-5" />} label="Wishlist" />
-        <MobileNavLink href="/cart" icon={
-          <span className="relative">
-            <ShoppingBag className="h-5 w-5" />
-            {cartCount > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                {cartCount > 9 ? "9+" : cartCount}
-              </span>
-            )}
-          </span>
-        } label="Cart" />
-        <MobileNavLink href="/account" icon={<User className="h-5 w-5" />} label="Account" />
+      <div className="flex h-16 items-center justify-around">
+        {tabs.map((tab) => {
+          const isActive = tab.match(pathname);
+          const Icon = tab.icon;
+
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={cn(
+                "flex w-full flex-col items-center justify-center h-full border-t-2 pt-1 transition-colors",
+                isActive
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <Icon
+                className="mb-1 h-5 w-5"
+                fill={isActive ? "currentColor" : "none"}
+                strokeWidth={isActive ? 1.5 : 2}
+              />
+              <span className="text-[10px] font-semibold leading-none">{tab.label}</span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
-  );
-}
-
-function MobileNavLink({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="flex flex-col items-center gap-0.5 text-muted-foreground transition-colors hover:text-foreground"
-    >
-      {icon}
-      <span className="text-[10px] font-medium">{label}</span>
-    </Link>
   );
 }
 

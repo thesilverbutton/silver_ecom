@@ -5,12 +5,13 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 const SLIDES = [
-  { src: "/hero_images/men_wear1.jpg", alt: "Men's handloom fashion" },
-  { src: "/hero_images/wemen_wear_saare.jpg", alt: "Women's handloom saree" },
+  { src: "/hero_images/about_m1_rs-min.webp", alt: "The Silver Button — Handloom fashion" },
+  { src: "/hero_images/new_hm_2-min.webp", alt: "Luxury handloom collection" },
   { src: "/hero_images/men_wear2.jpg", alt: "Men's handloom collection" },
+  { src: "/hero_images/about_m1_rt-min.webp", alt: "Artisan craftsmanship" },
 ];
 
-const INTERVAL = 5000; // 5 seconds per slide
+const INTERVAL = 5000;
 
 function HeroCarousel({ children }: { children: React.ReactNode }) {
   const [current, setCurrent] = useState(0);
@@ -25,7 +26,7 @@ function HeroCarousel({ children }: { children: React.ReactNode }) {
   }, [next]);
 
   return (
-    <section className="relative flex h-screen items-center justify-center overflow-hidden">
+    <section className="relative flex h-[85vh] w-full items-center justify-center overflow-hidden">
       {/* Background images */}
       {SLIDES.map((slide, i) => (
         <div
@@ -46,10 +47,10 @@ function HeroCarousel({ children }: { children: React.ReactNode }) {
         </div>
       ))}
 
-      {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-black/40" />
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-foreground/40" />
 
-      {/* Content on top */}
+      {/* Content */}
       <div className="relative z-10">{children}</div>
 
       {/* Slide indicators */}

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProductBySlug, getRelatedProducts } from "@/services/product.service";
-import { Container, Section } from "@/components/layout/section";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ProductCard } from "@/components/product/product-card";
 import { siteConfig } from "@/config/site";
@@ -74,7 +73,7 @@ export default async function ProductPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <Container className="py-8">
+      <main className="mx-auto max-w-[1280px] px-5 py-8 md:px-16 md:py-12">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
@@ -85,11 +84,15 @@ export default async function ProductPage({ params }: PageProps) {
 
         <ProductDetails product={JSON.parse(JSON.stringify(product))} />
 
-        {/* Related products */}
+        {/* You may also like */}
         {related.length > 0 && (
-          <Section as="div" className="py-12">
-            <h2 className="mb-6 text-xl font-semibold">You may also like</h2>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          <section className="mb-12 mt-24">
+            <div className="mb-8 flex items-end justify-between">
+              <h2 className="font-[family-name:var(--font-serif)] text-xl font-semibold text-foreground md:text-2xl">
+                You may also like
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
               {related.map((rp) => (
                 <ProductCard
                   key={String(rp._id)}
@@ -102,9 +105,9 @@ export default async function ProductPage({ params }: PageProps) {
                 />
               ))}
             </div>
-          </Section>
+          </section>
         )}
-      </Container>
+      </main>
     </>
   );
 }
