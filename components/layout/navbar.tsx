@@ -57,10 +57,12 @@ function Navbar({ cartCount = 0, className }: NavbarProps) {
             <Image
               src="/favicon.png"
               alt="The Silver Button"
-              width={160}
-              height={44}
-              className="h-11 w-auto md:h-14"
-              style={{ width: "auto" }}
+              width={260}
+              height={80}
+              className="h-14 w-auto max-w-[180px] sm:h-16 sm:max-w-[220px] md:h-20 md:max-w-[260px]"
+              style={{ width: "auto", height: "auto" }}
+              sizes="(max-width: 768px) 140px, 260px"
+              quality={100}
               priority
             />
           </Link>
@@ -153,17 +155,16 @@ function Navbar({ cartCount = 0, className }: NavbarProps) {
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border px-5 py-6">
-              <Link
-                href="/"
-                onClick={() => setMobileOpen(false)}
-              >
+              <Link href="/" onClick={() => setMobileOpen(false)}>
                 <Image
                   src="/favicon.png"
                   alt="The Silver Button"
-                  width={140}
-                  height={40}
-                  className="h-10 w-auto"
-                  style={{ width: "auto" }}
+                  width={220}
+                  height={68}
+                  className="h-14 w-auto max-w-[160px]"
+                  style={{ width: "auto", height: "auto" }}
+                  sizes="140px"
+                  quality={100}
                 />
               </Link>
               <button
