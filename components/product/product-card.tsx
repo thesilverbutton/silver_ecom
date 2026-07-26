@@ -46,7 +46,7 @@ function ProductCard({
       {/* Image */}
       <Link
         href={`/products/${slug}`}
-        className="relative mb-4 aspect-[3/4] w-full overflow-hidden rounded-sm bg-foreground"
+        className="relative mb-4 aspect-[2/3] w-full overflow-hidden rounded-sm bg-foreground"
       >
         {/* Fallback: black bg with product title */}
         {imgError && (
