@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import { Customer } from "@/models/customer.model";
 import { ProfileForm } from "./profile-form";
 import { AddressSection } from "./address-section";
+import { SignOutSection } from "./sign-out-section";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -38,6 +39,8 @@ export default async function ProfilePage() {
       />
 
       <AddressSection addresses={addresses} />
+
+      <SignOutSection />
     </div>
   );
 }

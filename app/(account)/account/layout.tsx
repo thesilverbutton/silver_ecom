@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AccountNavClient } from "./account-nav";
-import { SignOutButton } from "./sign-out-button";
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -20,7 +19,6 @@ export default async function AccountLayout({ children }: { children: React.Reac
             <p className="text-sm text-muted-foreground">{session.user.email}</p>
           </div>
         </div>
-        <SignOutButton />
       </div>
 
       {/* Mobile: bottom tab bar for account nav */}
