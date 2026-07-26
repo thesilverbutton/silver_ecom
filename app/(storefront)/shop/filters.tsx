@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Category {
@@ -18,9 +19,22 @@ interface ShopFiltersProps {
 function ShopFilters({ categories }: ShopFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+
   const currentCategory = searchParams.get("category") || "";
   const currentGender = searchParams.get("gender") || "";
+  const currentSort = searchParams.get("sort") || "newest";
   const inStock = searchParams.get("inStock") === "true";
+
+  const sortOptions = [
+    { value: "newest", label: "Newest" },
+    { value: "price_asc", label: "Price: Low to High" },
+    { value: "price_desc", label: "Price: High to Low" },
+    { value: "popular", label: "Most Popular" },
+  ];
+
+  const currentSortLabel = sortOptions.find((s) => s.value === currentSort)?.label || "Sort By";
 
   const updateFilter = useCallback(
     (key: string, value: string) => {
@@ -36,80 +50,141 @@ function ShopFilters({ categories }: ShopFiltersProps) {
     [router, searchParams],
   );
 
-  return (
+  const filterContent = (
     <div className="space-y-8">
-      {/* Gender Filter */}
-      <div className="border-b border-border pb-6">
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-foreground">
-          Gender
-        </h3>
-        <div className="space-y-3 text-sm text-muted-foreground">
-          {[
-            { value: "men", label: "Men" },
-            { value: "women", label: "Women" },
-          ].map((g) => (
-            <label key={g.value} className="group flex cursor-pointer items-center gap-3">
+      {/* Gender */}
+      <div>
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider">Gender</h3>
+        <div className="space-y-3 text-sm">
+          {[{ value: "men", label: "Men" }, { value: "women", label: "Women" }].map((g) => (
+            <label key={g.value} className="flex cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
                 checked={currentGender === g.value}
                 onChange={() => updateFilter("gender", currentGender === g.value ? "" : g.value)}
-                className="h-4 w-4 rounded-sm border-border text-foreground focus:ring-foreground"
+                className="h-4 w-4 rounded-sm border-border"
               />
-              <span className="transition-colors group-hover:text-foreground">{g.label}</span>
+              <span className="text-muted-foreground hover:text-foreground">{g.label}</span>
             </label>
           ))}
         </div>
       </div>
 
-      {/* Category Filter */}
-      <div className="border-b border-border pb-6">
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-foreground">
-          Category
-        </h3>
-        <div className="space-y-3 text-sm text-muted-foreground">
-          {categories
-            .filter((c) => c.parentId)
-            .map((cat) => (
-              <label key={String(cat._id)} className="group flex cursor-pointer items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={currentCategory === cat.slug}
-                  onChange={() =>
-                    updateFilter("category", currentCategory === cat.slug ? "" : cat.slug)
-                  }
-                  className="h-4 w-4 rounded-sm border-border text-foreground focus:ring-foreground"
-                />
-                <span className="transition-colors group-hover:text-foreground">{cat.name}</span>
-              </label>
-            ))}
+      {/* Category */}
+      <div>
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider">Category</h3>
+        <div className="space-y-3 text-sm">
+          {categories.filter((c) => c.parentId).map((cat) => (
+            <label key={String(cat._id)} className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={currentCategory === cat.slug}
+                onChange={() => updateFilter("category", currentCategory === cat.slug ? "" : cat.slug)}
+                className="h-4 w-4 rounded-sm border-border"
+              />
+              <span className="text-muted-foreground hover:text-foreground">{cat.name}</span>
+            </label>
+          ))}
         </div>
       </div>
 
-      {/* In Stock Toggle */}
-      <div className="flex items-center justify-between border-b border-border pb-6">
-        <span className="text-xs font-semibold uppercase tracking-wider text-foreground">
-          In Stock Only
-        </span>
+      {/* In Stock */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-wider">In Stock Only</span>
         <button
           type="button"
           onClick={() => updateFilter("inStock", inStock ? "" : "true")}
           className={cn(
-            "relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-foreground focus:ring-offset-2",
-            inStock ? "bg-foreground" : "bg-border",
+            "relative inline-flex h-5 w-9 rounded-full transition-colors",
+            inStock ? "bg-primary" : "bg-border",
           )}
           role="switch"
           aria-checked={inStock}
         >
-          <span
-            aria-hidden="true"
-            className={cn(
-              "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-              inStock ? "translate-x-4" : "translate-x-0",
-            )}
-          />
+          <span className={cn("inline-block h-4 w-4 translate-y-0.5 rounded-full bg-white shadow transition-transform", inStock ? "translate-x-4" : "translate-x-0.5")} />
         </button>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {/* Mobile: filter bar + sort */}
+      <div className="mb-4 flex items-center justify-between gap-3 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          Filters
+        </button>
+
+        {/* Sort dropdown (mobile) */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setSortOpen(!sortOpen)}
+            className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+          >
+            {currentSortLabel}
+            <ChevronDown className="h-3.5 w-3.5" />
+          </button>
+          {sortOpen && (
+            <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border bg-background p-1 shadow-md">
+              {sortOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => { updateFilter("sort", opt.value); setSortOpen(false); }}
+                  className={cn("block w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-secondary", currentSort === opt.value && "bg-secondary font-medium")}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile: filter drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 w-72 overflow-y-auto bg-background p-6 shadow-xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Filters</h2>
+              <button type="button" onClick={() => setMobileOpen(false)} className="rounded p-1 hover:bg-secondary" aria-label="Close">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {filterContent}
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop: sidebar filters + sort */}
+      <aside className="hidden lg:block">
+        {/* Sort (desktop) */}
+        <div className="mb-8">
+          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider">Sort By</h3>
+          <div className="space-y-2 text-sm">
+            {sortOptions.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => updateFilter("sort", opt.value)}
+                className={cn("block w-full rounded-md px-3 py-2 text-left transition-colors hover:bg-secondary", currentSort === opt.value && "bg-secondary font-medium text-foreground")}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filterContent}
+      </aside>
+    </>
   );
 }
 

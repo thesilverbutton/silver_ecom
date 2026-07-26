@@ -81,14 +81,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       </div>
 
       {/* Main Grid: Sidebar + Products */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
-        {/* Left Sidebar Filters */}
-        <aside className="hidden pr-8 md:col-span-3 md:block">
-          <ShopFilters categories={serializedCategories} />
-        </aside>
+      <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
+        {/* Filters — desktop sidebar + mobile drawer */}
+        <ShopFilters categories={serializedCategories} />
 
         {/* Product Grid */}
-        <div className="col-span-1 md:col-span-9">
+        <div>
           {result.items.length === 0 ? (
             <EmptyState title="No products found" description="Try adjusting your filters." />
           ) : (

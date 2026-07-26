@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { getProductBySlug, getRelatedProducts } from "@/services/product.service";
-import { getCart } from "@/actions/cart";
+import { getCart as getCartService } from "@/services/cart.service";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ProductCard } from "@/components/product/product-card";
 import { siteConfig } from "@/config/site";
@@ -33,9 +34,18 @@ export default async function ProductPage({ params }: PageProps) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  // Check if product is already in cart
-  const cart = await getCart();
-  const isInCart = cart.items.some((item) => item.productId === String(product._id));
+  // Check if product is already in cart (read-only, no cookie creation)
+  let isInCart = false;
+  try {
+    const cookieStore = await cookies();
+    const cartId = cookieStore.get("tsb_cart_id")?.value;
+    if (cartId) {
+      const cart = await getCartService(cartId);
+      isInCart = cart.items.some((item) => item.productId === String(product._id));
+    }
+  } catch {
+    // No cart cookie or read failed — isInCart stays false
+  }
 
   const related = await getRelatedProducts(
     String(product._id),
