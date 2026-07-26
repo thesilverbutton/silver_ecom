@@ -116,13 +116,13 @@ function Navbar({ cartCount = 0, className }: NavbarProps) {
             >
               <Search className="h-5 w-5" />
             </button>
-            <button
-              type="button"
+            <Link
+              href="/account"
               className="hidden h-10 w-10 items-center justify-center rounded-full text-foreground transition-all duration-300 hover:bg-secondary md:inline-flex"
               aria-label="Account"
             >
               <User className="h-5 w-5" />
-            </button>
+            </Link>
             <Link
               href="/cart"
               className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-all duration-300 hover:bg-secondary"

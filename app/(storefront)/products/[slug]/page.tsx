@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProductBySlug, getRelatedProducts } from "@/services/product.service";
+import { getCart } from "@/actions/cart";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ProductCard } from "@/components/product/product-card";
 import { siteConfig } from "@/config/site";
@@ -31,6 +32,10 @@ export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
+
+  // Check if product is already in cart
+  const cart = await getCart();
+  const isInCart = cart.items.some((item) => item.productId === String(product._id));
 
   const related = await getRelatedProducts(
     String(product._id),
@@ -82,7 +87,7 @@ export default async function ProductPage({ params }: PageProps) {
           ]}
         />
 
-        <ProductDetails product={JSON.parse(JSON.stringify(product))} />
+        <ProductDetails product={JSON.parse(JSON.stringify(product))} isInCart={isInCart} />
 
         {/* You may also like */}
         {related.length > 0 && (

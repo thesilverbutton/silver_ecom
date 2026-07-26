@@ -260,13 +260,12 @@ function CartPageClient({ initialCart }: CartPageClientProps) {
         </div>
 
         {/* Checkout CTA */}
-        <button
-          type="button"
-          disabled={!cart.valid || isPending}
-          className="mt-6 w-full rounded-lg bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+        <Link
+          href="/checkout"
+          className={`mt-6 block w-full rounded-lg bg-primary py-3 text-center text-sm font-semibold text-primary-foreground hover:bg-primary/90 ${!cart.valid ? "pointer-events-none opacity-50" : ""}`}
         >
           Proceed to Checkout
-        </button>
+        </Link>
 
         {!cart.valid && (
           <p className="mt-2 text-center text-xs text-destructive">

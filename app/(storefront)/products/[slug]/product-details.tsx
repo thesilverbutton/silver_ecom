@@ -62,12 +62,13 @@ interface Product {
 
 interface ProductDetailsProps {
   product: Product;
+  isInCart?: boolean;
 }
 
-function ProductDetails({ product }: ProductDetailsProps) {
+function ProductDetails({ product, isInCart = false }: ProductDetailsProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isPending, startTransition] = useTransition();
-  const [added, setAdded] = useState(false);
+  const [added, setAdded] = useState(isInCart);
 
   // Track selected options as a map (e.g., { size: "M", artForm: "Type 1" })
   const optionKeys = product.hasVariants

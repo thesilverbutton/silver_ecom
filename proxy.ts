@@ -22,10 +22,10 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Protect /admin/* (except /admin/login) — require admin/staff role
-  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+  // Protect /admin/* — require admin/staff role
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin-login")) {
     if (!token || !["admin", "staff"].includes(token.role as string)) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+      return NextResponse.redirect(new URL("/admin-login", request.url));
     }
   }
 
