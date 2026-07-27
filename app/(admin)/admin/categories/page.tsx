@@ -1,41 +1,35 @@
-import { getAllCategories } from "@/services/category.service";
+import { connectDB } from "@/lib/db";
+import { Category } from "@/models/category.model";
+import { Product } from "@/models/product.model";
+import { CategoriesClient } from "./categories-client";
 
 export default async function AdminCategoriesPage() {
-  const categories = await getAllCategories();
+  await connectDB();
 
-  return (
-    <div>
-      <h1 className="text-2xl font-bold">Categories</h1>
-      <p className="text-sm text-muted-foreground">{categories.length} categories</p>
+  const menParent = await Category.findOne({ slug: "men" }).lean();
+  const womenParent = await Category.findOne({ slug: "women" }).lean();
 
-      <div className="mt-6 overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="border-b bg-muted/50">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium">Name</th>
-              <th className="px-4 py-3 text-left font-medium">Slug</th>
-              <th className="px-4 py-3 text-left font-medium">Kind</th>
-              <th className="px-4 py-3 text-left font-medium">Status</th>
-              <th className="px-4 py-3 text-right font-medium">Position</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {categories.map((cat) => (
-              <tr key={String(cat._id)} className="hover:bg-muted/30">
-                <td className="px-4 py-3 font-medium">{cat.name}</td>
-                <td className="px-4 py-3 font-mono text-muted-foreground">{cat.slug}</td>
-                <td className="px-4 py-3 capitalize text-muted-foreground">{cat.kind}</td>
-                <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${cat.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}>
-                    {cat.isActive ? "Active" : "Inactive"}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right">{cat.position}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+  const [menCats, womenCats] = await Promise.all([
+    menParent ? Category.find({ parentId: menParent._id }).sort({ position: 1 }).lean() : [],
+    womenParent ? Category.find({ parentId: womenParent._id }).sort({ position: 1 }).lean() : [],
+  ]);
+
+  // Count products per category
+  const withCounts = async (cats: typeof menCats, gender: "men" | "women") =>
+    Promise.all(
+      cats.map(async (c) => ({
+        _id: String(c._id),
+        name: c.name,
+        slug: c.slug,
+        gender,
+        productCount: await Product.countDocuments({ categoryId: c._id }),
+      })),
+    );
+
+  const [menCategories, womenCategories] = await Promise.all([
+    withCounts(menCats, "men"),
+    withCounts(womenCats, "women"),
+  ]);
+
+  return <CategoriesClient menCategories={menCategories} womenCategories={womenCategories} />;
 }

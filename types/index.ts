@@ -38,9 +38,12 @@ export interface PaginationParams {
 
 // ─── Product ───────────────────────────────────────────────────────────────
 
+export type ImageLabel = "Front" | "Back" | "Zoomed" | "Customized" | "Type 1" | "Type 2" | "Type 3";
+
 export interface ProductImage {
   url: string;
   publicId: string;
+  label: ImageLabel;
   alt: string;
   width: number;
   height: number;

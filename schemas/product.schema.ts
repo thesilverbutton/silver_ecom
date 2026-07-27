@@ -1,8 +1,19 @@
 import { z } from "zod";
 
+export const IMAGE_LABELS = [
+  "Front",
+  "Back",
+  "Zoomed",
+  "Customized",
+  "Type 1",
+  "Type 2",
+  "Type 3",
+] as const;
+
 export const productImageSchema = z.object({
   url: z.string().url(),
   publicId: z.string().min(1),
+  label: z.enum(IMAGE_LABELS),
   alt: z.string().min(1),
   width: z.number().int().positive(),
   height: z.number().int().positive(),

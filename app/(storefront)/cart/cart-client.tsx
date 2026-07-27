@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, Trash2, Tag, ShoppingBag } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatINR } from "@/lib/utils";
 import {
@@ -11,8 +11,6 @@ import {
   updateCartItem,
   removeCartItem,
   clearCart,
-  applyCoupon,
-  removeCoupon,
 } from "@/actions/cart";
 import type { ResolvedCart } from "@/services/cart.service";
 
@@ -23,8 +21,6 @@ interface CartPageClientProps {
 function CartPageClient({ initialCart }: CartPageClientProps) {
   const [cart, setCart] = useState(initialCart);
   const [isPending, startTransition] = useTransition();
-  const [couponInput, setCouponInput] = useState("");
-  const [couponError, setCouponError] = useState("");
 
   const refresh = () => {
     startTransition(async () => {
@@ -52,29 +48,6 @@ function CartPageClient({ initialCart }: CartPageClientProps) {
   const handleClear = () => {
     startTransition(async () => {
       await clearCart();
-      const updated = await getCart();
-      setCart(updated);
-    });
-  };
-
-  const handleApplyCoupon = () => {
-    if (!couponInput.trim()) return;
-    setCouponError("");
-    startTransition(async () => {
-      const result = await applyCoupon(couponInput.trim());
-      if (!result.success) {
-        setCouponError(result.error || "Invalid coupon");
-      } else {
-        setCouponInput("");
-      }
-      const updated = await getCart();
-      setCart(updated);
-    });
-  };
-
-  const handleRemoveCoupon = () => {
-    startTransition(async () => {
-      await removeCoupon();
       const updated = await getCart();
       setCart(updated);
     });
@@ -191,46 +164,6 @@ function CartPageClient({ initialCart }: CartPageClientProps) {
       {/* Summary sidebar */}
       <div className="rounded-lg border p-6 h-fit sticky top-28">
         <h2 className="text-lg font-semibold">Order Summary</h2>
-
-        {/* Coupon */}
-        <div className="mt-4">
-          {cart.couponCode ? (
-            <div className="flex items-center justify-between rounded-md bg-secondary/50 px-3 py-2">
-              <div className="flex items-center gap-2">
-                <Tag className="h-4 w-4 text-success" />
-                <span className="text-sm font-medium">{cart.couponCode}</span>
-              </div>
-              <button
-                type="button"
-                onClick={handleRemoveCoupon}
-                disabled={isPending}
-                className="text-xs text-muted-foreground hover:text-destructive"
-              >
-                Remove
-              </button>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={couponInput}
-                onChange={(e) => setCouponInput(e.target.value)}
-                placeholder="Coupon code"
-                className="flex-1 rounded-md border px-3 py-2 text-sm"
-              />
-              <button
-                type="button"
-                onClick={handleApplyCoupon}
-                disabled={isPending || !couponInput.trim()}
-                className="rounded-md bg-secondary px-4 py-2 text-sm font-medium hover:bg-secondary/80 disabled:opacity-50"
-              >
-                Apply
-              </button>
-            </div>
-          )}
-          {couponError && <p className="mt-1 text-xs text-destructive">{couponError}</p>}
-          {cart.couponError && <p className="mt-1 text-xs text-destructive">{cart.couponError}</p>}
-        </div>
 
         {/* Totals */}
         <div className="mt-6 space-y-2 text-sm">

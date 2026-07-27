@@ -88,6 +88,44 @@ export async function getProductBySlug(slug: string) {
   return product;
 }
 
+// --- Admin product listing (shows ALL statuses, supports filters) ---
+
+export interface AdminProductFilter {
+  categoryId?: string;
+  gender?: "men" | "women" | "unisex";
+  status?: "draft" | "active" | "archived";
+  q?: string;
+}
+
+export async function getAdminProducts(
+  filter: AdminProductFilter = {},
+  pagination: PaginationParams = {},
+): Promise<PaginatedResult<Record<string, unknown>>> {
+  await connectDB();
+
+  const { page = 1, limit = 20 } = pagination;
+  const safeLimit = Math.min(limit, 60);
+  const skip = (page - 1) * safeLimit;
+
+  const query: Record<string, unknown> = {};
+  if (filter.categoryId) query.categoryId = filter.categoryId;
+  if (filter.gender) query.gender = filter.gender;
+  if (filter.status) query.status = filter.status;
+  if (filter.q) query.title = { $regex: filter.q.trim(), $options: "i" };
+
+  const [items, total] = await Promise.all([
+    Product.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .select("title slug images basePrice gender status hasVariants stock variants categoryId")
+      .lean(),
+    Product.countDocuments(query),
+  ]);
+
+  return { items, page, limit: safeLimit, total, totalPages: Math.ceil(total / safeLimit) };
+}
+
 export async function getRelatedProducts(productId: string, categoryId: string, limit = 8) {
   await connectDB();
   return Product.find({

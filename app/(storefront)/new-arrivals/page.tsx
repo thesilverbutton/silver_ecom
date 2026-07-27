@@ -25,7 +25,7 @@ export default async function NewArrivalsPage() {
       {products.length === 0 ? (
         <EmptyState title="Coming soon" description="New arrivals are on their way." className="mt-8" />
       ) : (
-        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-3">
           {products.map((product) => (
             <ProductCard
               key={String(product._id)}

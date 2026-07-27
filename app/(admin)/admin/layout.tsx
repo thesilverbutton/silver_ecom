@@ -11,10 +11,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen">
       <AdminSidebar />
-      <div className="flex flex-1 flex-col">
-        <AdminTopbar user={session.user} />
+
+      {/* Content area — offset by fixed sidebar width on desktop */}
+      <div className="flex h-screen flex-col lg:pl-60">
+        {/* Fixed top bar */}
+        <div className="shrink-0">
+          <AdminTopbar user={session.user} />
+        </div>
+        {/* Scrollable main */}
         <main className="flex-1 overflow-y-auto bg-muted/20 p-6">{children}</main>
       </div>
     </div>

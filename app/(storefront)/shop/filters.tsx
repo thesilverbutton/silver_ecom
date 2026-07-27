@@ -73,18 +73,39 @@ function ShopFilters({ categories }: ShopFiltersProps) {
       {/* Category */}
       <div>
         <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider">Category</h3>
-        <div className="space-y-3 text-sm">
-          {categories.filter((c) => c.parentId).map((cat) => (
-            <label key={String(cat._id)} className="flex cursor-pointer items-center gap-3">
-              <input
-                type="checkbox"
-                checked={currentCategory === cat.slug}
-                onChange={() => updateFilter("category", currentCategory === cat.slug ? "" : cat.slug)}
-                className="h-4 w-4 rounded-sm border-border"
-              />
-              <span className="text-muted-foreground hover:text-foreground">{cat.name}</span>
-            </label>
-          ))}
+        <div className="space-y-4 text-sm">
+          <div>
+            <p className="mb-2 text-xs font-medium text-muted-foreground">Men</p>
+            <div className="space-y-3">
+              {categories.filter((c) => c.parentId && c.slug.startsWith("men-")).map((cat) => (
+                <label key={String(cat._id)} className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={currentCategory === cat.slug}
+                    onChange={() => updateFilter("category", currentCategory === cat.slug ? "" : cat.slug)}
+                    className="h-4 w-4 rounded-sm border-border"
+                  />
+                  <span className="text-muted-foreground hover:text-foreground">{cat.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-medium text-muted-foreground">Women</p>
+            <div className="space-y-3">
+              {categories.filter((c) => c.parentId && c.slug.startsWith("women-")).map((cat) => (
+                <label key={String(cat._id)} className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={currentCategory === cat.slug}
+                    onChange={() => updateFilter("category", currentCategory === cat.slug ? "" : cat.slug)}
+                    className="h-4 w-4 rounded-sm border-border"
+                  />
+                  <span className="text-muted-foreground hover:text-foreground">{cat.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 

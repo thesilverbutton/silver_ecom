@@ -1,8 +1,22 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
 
+/** Fixed set of image labels for reliable filtering/fetching */
+export const IMAGE_LABELS = [
+  "Front",
+  "Back",
+  "Zoomed",
+  "Customized",
+  "Type 1",
+  "Type 2",
+  "Type 3",
+] as const;
+
+export type ImageLabel = (typeof IMAGE_LABELS)[number];
+
 export interface IProductImage {
   url: string;
   publicId: string;
+  label: ImageLabel;
   alt: string;
   width: number;
   height: number;
@@ -63,6 +77,7 @@ const ProductImageSchema = new Schema<IProductImage>(
   {
     url: { type: String, required: true },
     publicId: { type: String, required: true },
+    label: { type: String, enum: IMAGE_LABELS, required: true },
     alt: { type: String, required: true },
     width: { type: Number, required: true },
     height: { type: Number, required: true },

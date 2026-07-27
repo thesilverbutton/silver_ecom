@@ -9,7 +9,7 @@ interface TopbarProps {
 
 export function AdminTopbar({ user }: TopbarProps) {
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-background px-6">
+    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b bg-background px-6">
       <div />
       <div className="flex items-center gap-4">
         <div className="text-right">

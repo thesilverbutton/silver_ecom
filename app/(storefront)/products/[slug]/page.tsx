@@ -107,7 +107,7 @@ export default async function ProductPage({ params }: PageProps) {
                 You may also like
               </h2>
             </div>
-            <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
               {related.map((rp) => (
                 <ProductCard
                   key={String(rp._id)}

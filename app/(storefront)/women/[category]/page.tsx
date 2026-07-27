@@ -40,7 +40,7 @@ export default async function WomenCategoryPage({ params }: PageProps) {
       {result.items.length === 0 ? (
         <EmptyState title="No products yet" description="Check back soon for new arrivals." className="mt-8" />
       ) : (
-        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-3">
           {result.items.map((product: Record<string, unknown>) => (
             <ProductCard
               key={String(product._id)}

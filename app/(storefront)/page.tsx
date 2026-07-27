@@ -43,18 +43,41 @@ export default async function HomePage() {
         </div>
       </HeroCarousel>
 
-      {/* Category Pills */}
+      {/* Category Pills — grouped by gender */}
       <section className="mx-auto max-w-[1280px] px-5 py-12 md:px-16">
-        <div className="flex flex-wrap gap-3">
-          {allCategories.map((cat) => (
-            <Link
-              key={String(cat._id)}
-              href={`/${cat.slug.startsWith("men") ? "men" : "women"}/${cat.slug.replace(/^(men|women)-/, "")}`}
-              className="rounded-full border border-border bg-secondary/30 px-6 py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-muted-foreground hover:bg-secondary"
-            >
-              {cat.name}
-            </Link>
-          ))}
+        <div className="grid gap-8 md:grid-cols-2">
+          <div>
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Men</h3>
+            <div className="flex flex-wrap gap-2">
+              {allCategories
+                .filter((cat) => cat.slug.startsWith("men-"))
+                .map((cat) => (
+                  <Link
+                    key={String(cat._id)}
+                    href={`/men/${cat.slug.replace("men-", "")}`}
+                    className="rounded-full border border-border bg-secondary/30 px-5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-muted-foreground hover:bg-secondary"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+            </div>
+          </div>
+          <div>
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Women</h3>
+            <div className="flex flex-wrap gap-2">
+              {allCategories
+                .filter((cat) => cat.slug.startsWith("women-"))
+                .map((cat) => (
+                  <Link
+                    key={String(cat._id)}
+                    href={`/women/${cat.slug.replace("women-", "")}`}
+                    className="rounded-full border border-border bg-secondary/30 px-5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-muted-foreground hover:bg-secondary"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+            </div>
+          </div>
         </div>
       </section>
 

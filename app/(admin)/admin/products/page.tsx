@@ -1,8 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Plus } from "lucide-react";
-import { getProducts } from "@/services/product.service";
+import { getAdminProducts } from "@/services/product.service";
+import { getAllCategories } from "@/services/category.service";
 import { formatINR } from "@/lib/utils";
+import { AdminProductFilters } from "./product-filters";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -11,7 +13,37 @@ interface PageProps {
 export default async function AdminProductsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = Number(params.page) || 1;
-  const result = await getProducts({ status: (params.status as "active" | "draft" | "archived") || undefined }, { page, limit: 20, sort: "newest" });
+
+  const result = await getAdminProducts(
+    {
+      categoryId: params.category,
+      gender: params.gender as "men" | "women" | "unisex" | undefined,
+      status: params.status as "active" | "draft" | "archived" | undefined,
+      q: params.q,
+    },
+    { page, limit: 20 },
+  );
+
+  const categories = await getAllCategories();
+  const subCats = categories
+    .filter((c) => c.parentId)
+    .map((c) => ({
+      _id: String(c._id),
+      name: c.name,
+      slug: c.slug,
+      gender: (c.slug.startsWith("men-") ? "men" : "women") as "men" | "women",
+    }));
+
+  // Build query string for pagination that preserves filters
+  const buildPageUrl = (p: number) => {
+    const sp = new URLSearchParams();
+    if (params.category) sp.set("category", params.category);
+    if (params.gender) sp.set("gender", params.gender);
+    if (params.status) sp.set("status", params.status);
+    if (params.q) sp.set("q", params.q);
+    sp.set("page", String(p));
+    return `/admin/products?${sp.toString()}`;
+  };
 
   return (
     <div>
@@ -23,6 +55,11 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
         <Link href="/admin/products/new" className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
           <Plus className="h-4 w-4" /> Add Product
         </Link>
+      </div>
+
+      {/* Filters */}
+      <div className="mt-6">
+        <AdminProductFilters categories={subCats} />
       </div>
 
       <div className="mt-6 overflow-x-auto rounded-lg border">
@@ -59,15 +96,18 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
                 <td className="px-4 py-3 text-right">{product.hasVariants ? "—" : String(product.stock)}</td>
               </tr>
             ))}
+            {result.items.length === 0 && (
+              <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No products match these filters</td></tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {result.totalPages > 1 && (
         <div className="mt-4 flex justify-center gap-2">
-          {page > 1 && <Link href={`/admin/products?page=${page - 1}`} className="rounded border px-3 py-1 text-sm hover:bg-secondary">Prev</Link>}
+          {page > 1 && <Link href={buildPageUrl(page - 1)} className="rounded border px-3 py-1 text-sm hover:bg-secondary">Prev</Link>}
           <span className="px-3 py-1 text-sm text-muted-foreground">Page {page} of {result.totalPages}</span>
-          {page < result.totalPages && <Link href={`/admin/products?page=${page + 1}`} className="rounded border px-3 py-1 text-sm hover:bg-secondary">Next</Link>}
+          {page < result.totalPages && <Link href={buildPageUrl(page + 1)} className="rounded border px-3 py-1 text-sm hover:bg-secondary">Next</Link>}
         </div>
       )}
     </div>

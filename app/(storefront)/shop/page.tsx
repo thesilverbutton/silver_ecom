@@ -72,12 +72,6 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             {searchQuery ? `${result.items.length} items found` : `${result.total} items`}
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <button className="flex items-center gap-2 rounded border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-foreground">
-            <span>Sort By</span>
-            <ChevronRight className="h-3.5 w-3.5 rotate-90" />
-          </button>
-        </div>
       </div>
 
       {/* Main Grid: Sidebar + Products */}
