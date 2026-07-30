@@ -8,12 +8,22 @@ import { cn } from "@/lib/utils";
 import { navConfig } from "@/config/site";
 import { SearchOverlay } from "@/components/search/search-overlay";
 
+export interface NavItem {
+  label: string;
+  href: string;
+  children?: readonly { label: string; href: string }[];
+}
+
 interface NavbarProps {
   cartCount?: number;
   className?: string;
+  /** Optional dynamic nav (built from live categories). Falls back to static config. */
+  navItems?: readonly NavItem[];
 }
 
-function Navbar({ cartCount = 0, className }: NavbarProps) {
+function Navbar({ cartCount = 0, className, navItems }: NavbarProps) {
+  const mainNav: readonly NavItem[] = navItems && navItems.length > 0 ? navItems : navConfig.mainNav;
+
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedMobile, setExpandedMobile] = useState<string | null>(null);
@@ -69,7 +79,7 @@ function Navbar({ cartCount = 0, className }: NavbarProps) {
 
           {/* Center: Nav links (desktop) */}
           <nav className="hidden md:flex md:items-center md:gap-8">
-            {navConfig.mainNav.map((item) => (
+            {mainNav.map((item) => (
               <div
                 key={item.label}
                 className="relative"
@@ -180,7 +190,7 @@ function Navbar({ cartCount = 0, className }: NavbarProps) {
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto px-5 py-6">
               <ul className="space-y-2">
-                {navConfig.mainNav.map((item) => (
+                {mainNav.map((item) => (
                   <li key={item.label} className="border-b border-border pb-2">
                     {"children" in item && item.children ? (
                       <>

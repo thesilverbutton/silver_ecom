@@ -213,14 +213,6 @@ function ProductDetails({ product, isInCart = false }: ProductDetailsProps) {
                   <span className="ml-2 text-xs text-muted-foreground">(+₹{((activeVariant?.priceDelta || 0) / 100).toLocaleString("en-IN")} for customization)</span>
                 )}
               </span>
-              {group.key === "size" && (
-                <Link
-                  href="#"
-                  className="text-xs text-muted-foreground underline transition-colors hover:text-foreground"
-                >
-                  Size Guide
-                </Link>
-              )}
             </div>
             <VariantSelector
               label={group.label}
@@ -299,14 +291,6 @@ function ProductDetails({ product, isInCart = false }: ProductDetailsProps) {
               )}
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="xl"
-            className="h-14 w-14 rounded-lg"
-            aria-label="Add to Wishlist"
-          >
-            <Heart className="h-5 w-5" />
-          </Button>
         </div>
 
         {/* Shipping Promises */}

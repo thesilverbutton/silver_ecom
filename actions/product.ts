@@ -118,3 +118,34 @@ export async function createProductAction(input: CreateProductInput) {
     return { ok: false, error: err instanceof Error ? err.message : "Failed to create product" };
   }
 }
+
+export async function deleteProductAction(productId: string) {
+  try {
+    const session = await requireAdmin();
+    await connectDB();
+
+    const product = await Product.findById(productId);
+    if (!product) return { ok: false, error: "Product not found" };
+
+    await Product.findByIdAndDelete(productId);
+
+    await AuditLog.create({
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      actorRole: session.user.role as "admin" | "staff",
+      action: "product.delete",
+      entity: "Product",
+      entityId: productId,
+      after: { title: product.title, slug: product.slug },
+    });
+
+    logger.info("Product deleted", { productId, slug: product.slug });
+    revalidatePath("/admin/products");
+    revalidatePath("/shop");
+
+    return { ok: true };
+  } catch (err) {
+    logger.error("deleteProductAction failed", { error: String(err) });
+    return { ok: false, error: "Failed to delete product" };
+  }
+}

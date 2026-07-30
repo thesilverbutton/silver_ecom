@@ -5,6 +5,7 @@ import { getAdminProducts } from "@/services/product.service";
 import { getAllCategories } from "@/services/category.service";
 import { formatINR } from "@/lib/utils";
 import { AdminProductFilters } from "./product-filters";
+import { DeleteProductButton } from "./delete-product-button";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -71,6 +72,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
               <th className="px-4 py-3 text-left font-medium">Gender</th>
               <th className="px-4 py-3 text-right font-medium">Price</th>
               <th className="px-4 py-3 text-right font-medium">Stock</th>
+              <th className="px-4 py-3 text-right font-medium"></th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -94,10 +96,13 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
                 <td className="px-4 py-3 capitalize text-muted-foreground">{product.gender as string}</td>
                 <td className="px-4 py-3 text-right">{formatINR(product.basePrice as number)}</td>
                 <td className="px-4 py-3 text-right">{product.hasVariants ? "—" : String(product.stock)}</td>
+                <td className="px-4 py-3 text-right">
+                  <DeleteProductButton productId={String(product._id)} productTitle={product.title as string} />
+                </td>
               </tr>
             ))}
             {result.items.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No products match these filters</td></tr>
+              <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No products match these filters</td></tr>
             )}
           </tbody>
         </table>

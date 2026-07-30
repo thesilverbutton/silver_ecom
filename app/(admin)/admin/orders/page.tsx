@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connectDB } from "@/lib/db";
 import { Order } from "@/models/order.model";
 import { formatINR } from "@/lib/utils";
+import { OrderFilters } from "./components/order-filters";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -10,13 +11,30 @@ interface PageProps {
 export default async function AdminOrdersPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = Number(params.page) || 1;
-  const limit = 20;
+  const limit = 10;
   const skip = (page - 1) * limit;
 
   await connectDB();
 
   const query: Record<string, unknown> = {};
   if (params.status) query.status = { $in: params.status.split(",") };
+  if (params.paymentStatus) query.paymentStatus = { $in: params.paymentStatus.split(",") };
+  if (params.fulfillmentStatus) query.fulfillmentStatus = { $in: params.fulfillmentStatus.split(",") };
+  if (params.search) {
+    query.$or = [
+      { orderNumber: { $regex: params.search, $options: "i" } },
+      { email: { $regex: params.search, $options: "i" } },
+      { phone: { $regex: params.search, $options: "i" } },
+    ];
+  }
+
+  const baseParams = new URLSearchParams();
+  if (params.search) baseParams.set("search", params.search);
+  if (params.status) baseParams.set("status", params.status);
+  if (params.paymentStatus) baseParams.set("paymentStatus", params.paymentStatus);
+  if (params.fulfillmentStatus) baseParams.set("fulfillmentStatus", params.fulfillmentStatus);
+  const baseQueryString = baseParams.toString();
+  const getPageUrl = (p: number) => `/admin/orders?page=${p}${baseQueryString ? `&${baseQueryString}` : ""}`;
 
   const [orders, total] = await Promise.all([
     Order.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).select("orderNumber email phone status paymentStatus fulfillmentStatus grandTotal createdAt").lean(),
@@ -28,9 +46,11 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
   return (
     <div>
       <h1 className="text-2xl font-bold">Orders</h1>
-      <p className="text-sm text-muted-foreground">{total} total</p>
+      <p className="text-sm text-muted-foreground mb-6">{total} total</p>
 
-      <div className="mt-6 overflow-x-auto rounded-lg border">
+      <OrderFilters />
+
+      <div className="overflow-x-auto rounded-lg border">
         <table className="w-full text-sm">
           <thead className="border-b bg-muted/50">
             <tr>
@@ -70,9 +90,9 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
 
       {totalPages > 1 && (
         <div className="mt-4 flex justify-center gap-2">
-          {page > 1 && <Link href={`/admin/orders?page=${page - 1}`} className="rounded border px-3 py-1 text-sm hover:bg-secondary">Prev</Link>}
+          {page > 1 && <Link href={getPageUrl(page - 1)} className="rounded border px-3 py-1 text-sm hover:bg-secondary">Prev</Link>}
           <span className="px-3 py-1 text-sm text-muted-foreground">Page {page} of {totalPages}</span>
-          {page < totalPages && <Link href={`/admin/orders?page=${page + 1}`} className="rounded border px-3 py-1 text-sm hover:bg-secondary">Next</Link>}
+          {page < totalPages && <Link href={getPageUrl(page + 1)} className="rounded border px-3 py-1 text-sm hover:bg-secondary">Next</Link>}
         </div>
       )}
     </div>

@@ -1,16 +1,52 @@
+import Link from "next/link";
 import { connectDB } from "@/lib/db";
 import { Customer } from "@/models/customer.model";
+import { CustomerFilters } from "./components/customer-filters";
 
-export default async function AdminCustomersPage() {
+interface PageProps {
+  searchParams: Promise<Record<string, string | undefined>>;
+}
+
+export default async function AdminCustomersPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
   await connectDB();
-  const customers = await Customer.find({}).sort({ createdAt: -1 }).limit(50).select("name email phone isBlocked createdAt").lean();
+
+  const query: Record<string, unknown> = {};
+  if (params.status === "active") query.isBlocked = false;
+  if (params.status === "blocked") query.isBlocked = true;
+  if (params.search) {
+    query.$or = [
+      { name: { $regex: params.search, $options: "i" } },
+      { email: { $regex: params.search, $options: "i" } },
+      { phone: { $regex: params.search, $options: "i" } },
+    ];
+  }
+
+  const baseParams = new URLSearchParams();
+  if (params.search) baseParams.set("search", params.search);
+  if (params.status) baseParams.set("status", params.status);
+  const baseQueryString = baseParams.toString();
+  const getPageUrl = (p: number) => `/admin/customers?page=${p}${baseQueryString ? `&${baseQueryString}` : ""}`;
+
+  const [customers, total] = await Promise.all([
+    Customer.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).select("name email phone isBlocked createdAt").lean(),
+    Customer.countDocuments(query),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div>
       <h1 className="text-2xl font-bold">Customers</h1>
-      <p className="text-sm text-muted-foreground">{customers.length} customers</p>
+      <p className="text-sm text-muted-foreground mb-6">{total} customers</p>
 
-      <div className="mt-6 overflow-x-auto rounded-lg border">
+      <CustomerFilters />
+
+      <div className="overflow-x-auto rounded-lg border">
         <table className="w-full text-sm">
           <thead className="border-b bg-muted/50">
             <tr>
@@ -43,6 +79,14 @@ export default async function AdminCustomersPage() {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-4 flex justify-center gap-2">
+          {page > 1 && <Link href={getPageUrl(page - 1)} className="rounded border px-3 py-1 text-sm hover:bg-secondary">Prev</Link>}
+          <span className="px-3 py-1 text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+          {page < totalPages && <Link href={getPageUrl(page + 1)} className="rounded border px-3 py-1 text-sm hover:bg-secondary">Next</Link>}
+        </div>
+      )}
     </div>
   );
 }

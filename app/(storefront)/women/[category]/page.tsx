@@ -1,44 +1,79 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { getProducts } from "@/services/product.service";
 import { getCategoryBySlug } from "@/services/category.service";
 import { Container } from "@/components/layout/section";
 import { ProductCard } from "@/components/product/product-card";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { EmptyState } from "@/components/layout/empty-state";
+import { CategoryEmpty } from "@/components/layout/category-empty";
 
 interface PageProps {
   params: Promise<{ category: string }>;
 }
 
+/** Turn a slug like "silver-button-shirts" into "Silver Button Shirts" */
+function humanize(slug: string) {
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { category } = await params;
   const cat = await getCategoryBySlug(`women-${category}`);
-  if (!cat) return { title: "Not Found" };
+  const name = cat?.name || humanize(category);
   return {
-    title: `Women's ${cat.name}`,
-    description: `Shop handloom ${cat.name.toLowerCase()} for women.`,
+    title: `Women's ${name}`,
+    description: `Shop handloom ${name.toLowerCase()} for women.`,
   };
 }
 
 export default async function WomenCategoryPage({ params }: PageProps) {
   const { category } = await params;
   const cat = await getCategoryBySlug(`women-${category}`);
-  if (!cat) notFound();
 
-  const result = await getProducts({ categoryId: String(cat._id), gender: "women" }, { limit: 24, sort: "newest" });
+  // Category no longer exists (or was removed) — show a friendly empty state
+  if (!cat) {
+    return (
+      <Container className="py-8">
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Women", href: "/women" },
+            { label: humanize(category) },
+          ]}
+        />
+        <CategoryEmpty categoryName={humanize(category)} gender="women" />
+      </Container>
+    );
+  }
+
+  const result = await getProducts(
+    { categoryId: String(cat._id), gender: "women" },
+    { limit: 24, sort: "newest" },
+  );
 
   return (
     <Container className="py-8">
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Women", href: "/women" }, { label: cat.name }]} />
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Women", href: "/women" },
+          { label: cat.name },
+        ]}
+      />
 
       <div className="mt-6">
-        <h1 className="text-2xl font-bold">Women&apos;s {cat.name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{result.total} products</p>
+        <h1 className="font-[family-name:var(--font-serif)] text-2xl font-semibold">
+          Women&apos;s {cat.name}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {result.total} {result.total === 1 ? "product" : "products"}
+        </p>
       </div>
 
       {result.items.length === 0 ? (
-        <EmptyState title="No products yet" description="Check back soon for new arrivals." className="mt-8" />
+        <CategoryEmpty categoryName={cat.name} gender="women" />
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-3">
           {result.items.map((product: Record<string, unknown>) => (

@@ -27,6 +27,12 @@ export function CategoriesClient({ menCategories, womenCategories }: Props) {
   const [name, setName] = useState("");
   const [gender, setGender] = useState<"men" | "women">("men");
 
+  // Delete confirmation state
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [deleteStep, setDeleteStep] = useState<1 | 2>(1); // step 1 = first confirm, step 2 = force confirm
+  const [deleteProductCount, setDeleteProductCount] = useState(0);
+
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -42,13 +48,23 @@ export function CategoriesClient({ menCategories, womenCategories }: Props) {
     });
   };
 
-  const handleDelete = (id: string, catName: string) => {
-    if (!confirm(`Delete category "${catName}"?`)) return;
+  const handleDelete = (force = false) => {
+    if (!deleteTarget) return;
+    setDeleteError("");
     startTransition(async () => {
-      const result = await deleteCategoryAction(id);
+      const result = await deleteCategoryAction(deleteTarget.id, force);
       if (!result.ok) {
-        alert(result.error);
+        if ((result as { requiresForce?: boolean }).requiresForce) {
+          // Products exist — show second confirmation
+          setDeleteStep(2);
+          setDeleteProductCount((result as { productCount?: number }).productCount || 0);
+          setDeleteError("");
+        } else {
+          setDeleteError(result.error || "Failed to delete");
+        }
       } else {
+        setDeleteTarget(null);
+        setDeleteStep(1);
         router.refresh();
       }
     });
@@ -71,7 +87,7 @@ export function CategoriesClient({ menCategories, womenCategories }: Props) {
               </Link>
               <button
                 type="button"
-                onClick={() => handleDelete(cat._id, cat.name)}
+                onClick={() => setDeleteTarget({ id: cat._id, name: cat.name })}
                 disabled={isPending}
                 className="rounded p-2 text-muted-foreground hover:bg-destructive/5 hover:text-destructive"
                 aria-label="Delete"
@@ -134,6 +150,83 @@ export function CategoriesClient({ menCategories, womenCategories }: Props) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => { setDeleteTarget(null); setDeleteError(""); setDeleteStep(1); }} />
+          <div className="relative w-full max-w-sm rounded-lg border bg-background p-6 shadow-lg">
+            {deleteStep === 1 ? (
+              <>
+                <h3 className="text-lg font-semibold text-destructive">Delete Category</h3>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  Are you sure you want to delete <span className="font-medium text-foreground">&ldquo;{deleteTarget.name}&rdquo;</span>?
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  This action cannot be undone.
+                </p>
+
+                {deleteError && (
+                  <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                    {deleteError}
+                  </div>
+                )}
+
+                <div className="mt-6 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(false)}
+                    disabled={isPending}
+                    className="flex-1 rounded-lg bg-destructive py-2.5 text-sm font-semibold text-white hover:bg-destructive/90 disabled:opacity-50"
+                  >
+                    {isPending ? "Checking..." : "Yes, Delete"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setDeleteTarget(null); setDeleteError(""); setDeleteStep(1); }}
+                    className="flex-1 rounded-lg border py-2.5 text-sm font-medium hover:bg-secondary"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-semibold text-destructive">⚠️ Final Confirmation</h3>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  This category contains <span className="font-semibold text-foreground">{deleteProductCount} product(s)</span>.
+                </p>
+                <p className="mt-2 text-sm font-medium text-destructive">
+                  Deleting will permanently remove all products in this category. This cannot be undone.
+                </p>
+
+                {deleteError && (
+                  <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                    {deleteError}
+                  </div>
+                )}
+
+                <div className="mt-6 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(true)}
+                    disabled={isPending}
+                    className="flex-1 rounded-lg bg-destructive py-2.5 text-sm font-semibold text-white hover:bg-destructive/90 disabled:opacity-50"
+                  >
+                    {isPending ? "Deleting..." : "Delete Category & All Products"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setDeleteTarget(null); setDeleteError(""); setDeleteStep(1); }}
+                    className="flex-1 rounded-lg border py-2.5 text-sm font-medium hover:bg-secondary"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

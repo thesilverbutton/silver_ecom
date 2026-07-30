@@ -61,26 +61,38 @@ export async function createCategoryAction(input: { name: string; gender: "men" 
   }
 }
 
-export async function deleteCategoryAction(categoryId: string) {
+export async function deleteCategoryAction(categoryId: string, forceDeleteProducts = false) {
   try {
     await requireAdmin();
     await connectDB();
 
-    // Guard: cannot delete if products use it
-    const productCount = await Product.countDocuments({ categoryId });
-    if (productCount > 0) {
-      return { ok: false, error: `Cannot delete — ${productCount} product(s) use this category. Move or delete them first.` };
-    }
-
-    // Guard: cannot delete gender root categories
     const cat = await Category.findById(categoryId);
     if (!cat) return { ok: false, error: "Category not found" };
     if (!cat.parentId) return { ok: false, error: "Cannot delete a gender root category" };
 
+    const productCount = await Product.countDocuments({ categoryId });
+
+    // If products exist and force not confirmed, ask for confirmation
+    if (productCount > 0 && !forceDeleteProducts) {
+      return {
+        ok: false,
+        error: `This will permanently delete ${productCount} product(s) in this category.`,
+        requiresForce: true,
+        productCount,
+      };
+    }
+
+    // Force delete: remove all products in this category first
+    if (productCount > 0 && forceDeleteProducts) {
+      await Product.deleteMany({ categoryId });
+      logger.info("Force-deleted products for category", { categoryId, count: productCount });
+    }
+
     await Category.findByIdAndDelete(categoryId);
 
-    logger.info("Category deleted", { categoryId });
+    logger.info("Category deleted", { categoryId, productsDeleted: productCount });
     revalidatePath("/admin/categories");
+    revalidatePath("/admin/products");
     revalidatePath("/", "layout");
     return { ok: true };
   } catch (err) {
