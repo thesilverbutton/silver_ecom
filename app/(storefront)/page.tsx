@@ -1,7 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getFeaturedProducts, getBestSellers } from "@/services/product.service";
 import { getCategoriesForGender } from "@/services/category.service";
-import { HeroCarousel } from "@/components/layout/hero-carousel";
 import { ProductCard } from "@/components/product/product-card";
 import { ArrowRight } from "lucide-react";
 
@@ -17,31 +17,41 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero */}
-      <HeroCarousel>
-        <div className="flex flex-col items-center text-center px-4">
-          <h1 className="font-[family-name:var(--font-serif)] text-4xl font-bold tracking-tight text-white drop-shadow-lg md:text-5xl lg:text-6xl max-w-3xl">
-            Handloom Fashion
+      {/* Hero — container matches image aspect ratio (1774x887) so nothing is cropped */}
+      <section className="relative w-full">
+        <Link
+          href="/shop"
+          aria-label="Shop the collection"
+          className="relative block w-full aspect-[1774/887]"
+        >
+          <Image
+            src="/hero_image.png"
+            alt="The Silver Button — Handloom Fashion"
+            fill
+            className="object-contain cleobject-center"
+            sizes="100vw" 
+            priority
+          />
+        </Link>
+
+        {/* Brand name — top center */}
+        <div className="pointer-events-none absolute top-8 left-1/2 z-10 -translate-x-1/2 md:top-14">
+          <h1 className="whitespace-nowrap font-[family-name:var(--font-serif)] text-xl font-bold uppercase tracking-[0.2em] text-[#3C332A] sm:text-2xl md:text-4xl md:tracking-[0.26em] lg:text-5xl">
+            The Silver Button
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-white/90">
-            Crafted with tradition for the modern wardrobe.
-          </p>
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <Link
-              href="/men"
-              className="rounded-lg bg-primary px-8 py-4 text-sm font-medium uppercase tracking-[0.05em] text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
-            >
-              Shop Men
-            </Link>
-            <Link
-              href="/women"
-              className="rounded-lg border border-white bg-transparent px-8 py-4 text-sm font-medium uppercase tracking-[0.05em] text-white transition-colors hover:bg-white/10"
-            >
-              Shop Women
-            </Link>
-          </div>
         </div>
-      </HeroCarousel>
+
+        {/* Centered bottom CTA */}
+        <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 md:bottom-10">
+          <Link
+            href="/shop"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-xs font-medium uppercase tracking-[0.08em] text-primary-foreground shadow-lg transition-colors hover:bg-primary/90 md:px-10 md:py-4 md:text-sm"
+          >
+            Explore Collection
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
 
       {/* Category Pills — grouped by gender */}
       <section className="mx-auto max-w-[1280px] px-5 py-12 md:px-16">
