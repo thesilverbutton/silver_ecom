@@ -6,15 +6,27 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 const POLICIES: Record<string, { title: string; content: string }> = {
   shipping: {
     title: "Shipping Policy",
-    content: `We ship across India via trusted courier partners.
+    content: `At The Silver Button, we strive to deliver your orders quickly and securely. We partner with India's most trusted courier services to ensure a seamless delivery experience.
 
-• Standard shipping: 5–7 business days
-• Express shipping: 2–3 business days (where available)
-• Free shipping on orders above ₹999
-• Orders are processed within 1–2 business days
-• You will receive a tracking link once your order ships
+ORDER PROCESSING
+• All orders are processed and dispatched within 1–2 business days (excluding weekends and public holidays).
+• In case of high order volumes, processing may take slightly longer. We will notify you of any significant delays.
 
-For any shipping queries, contact us at orders@thesilverbutton.com`,
+SHIPPING RATES & DELIVERY
+• Standard Shipping: Delivered within 5–7 business days.
+• Express Shipping: Delivered within 2–3 business days (where available).
+• Free standard shipping on all orders above ₹999.
+• For orders below ₹999, standard shipping rates apply as calculated at checkout.
+
+TRACKING YOUR ORDER
+• Once your order is dispatched, you will receive an email confirmation containing your courier tracking number and a link to trace your package.
+
+IMPORTANT CONSIDERATIONS
+• We currently ship exclusively within India.
+• Our courier partners will make up to three attempts to deliver your package before returning it to us.
+• Please ensure your shipping address and contact number are accurate to avoid delays.
+
+For any shipping-related queries, please contact our support team at orders@thesilverbutton.com.`,
   },
   returns: {
     title: "Returns & Refunds",
@@ -30,15 +42,29 @@ Custom-made or sale items are not eligible for returns.`,
   },
   privacy: {
     title: "Privacy Policy",
-    content: `Your privacy matters to us.
+    content: `At The Silver Button, we are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner. This policy outlines how we collect, use, and safeguard your data.
 
-• We collect only what's needed: name, email, phone, address for orders
-• Payment is processed securely by Razorpay — we never see or store card details
-• We don't sell or share your data with third parties
-• Cookies are used only for essential site functionality (cart, session)
-• You can request deletion of your account data anytime
+INFORMATION WE COLLECT
+• We only collect essential information required to process your orders and provide a seamless shopping experience. This includes your name, email address, phone number, and shipping address.
+• We do not collect or store your payment card details. All transactions are securely processed through our payment partner, Razorpay, using industry-standard encryption.
 
-For questions, email orders@thesilverbutton.com`,
+HOW WE USE YOUR DATA
+• To process and fulfill your orders, including sending order confirmations and shipping updates.
+• To communicate with you regarding your purchases or respond to customer service inquiries.
+• To improve our website functionality and enhance your overall user experience.
+
+DATA SHARING & SECURITY
+• We respect your privacy and will never sell, rent, or trade your personal information to third parties for marketing purposes.
+• Your data is only shared with trusted partners (such as courier services) strictly for the purpose of order fulfillment.
+
+COOKIES
+• We use cookies solely for essential site functionalities, such as maintaining your shopping cart and managing your active session. We do not use intrusive tracking cookies.
+
+YOUR RIGHTS
+• You have the right to request access to the personal data we hold about you.
+• You may request the deletion or modification of your account and personal information at any time.
+
+If you have any questions or concerns regarding our privacy practices, please contact us at orders@thesilverbutton.com.`,
   },
   terms: {
     title: "Terms & Conditions",

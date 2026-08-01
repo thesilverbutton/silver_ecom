@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { ContactForm } from "./components/contact-form";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -26,30 +27,7 @@ export default function ContactPage() {
 
         <div className="mt-8 grid gap-12 lg:grid-cols-2">
           {/* Contact form */}
-          <form className="space-y-4">
-            <div>
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="Your name" className="mt-1" required />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" className="mt-1" required />
-            </div>
-            <div>
-              <Label htmlFor="subject">Subject</Label>
-              <Input id="subject" placeholder="Order enquiry, sizing help, etc." className="mt-1" />
-            </div>
-            <div>
-              <Label htmlFor="message">Message</Label>
-              <Textarea id="message" placeholder="How can we help?" className="mt-1" rows={5} required />
-            </div>
-            {/* Honeypot for spam */}
-            <input type="text" name="website" className="hidden" tabIndex={-1} autoComplete="off" />
-            <Button type="submit" size="lg">
-              Send Message
-            </Button>
-            <p className="text-xs text-muted-foreground">We typically respond within 24 hours.</p>
-          </form>
+          <ContactForm />
 
           {/* Contact info */}
           <div className="space-y-6">
