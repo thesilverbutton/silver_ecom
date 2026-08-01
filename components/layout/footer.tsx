@@ -11,7 +11,7 @@ function Footer({ navItems }: FooterProps) {
   const womenLinks = navItems?.find((n) => n.label === "Women")?.children?.filter((l) => l.label !== "All Women") || [];
 
   return (
-    <footer className="mt-20 border-t border-border bg-secondary/50 pt-20 pb-10">
+    <footer className="border-t border-border bg-secondary/50 pt-20 pb-10">
       <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-6 px-5 md:grid-cols-4 md:px-16">
         {/* Brand Column */}
         <div className="col-span-1 mb-6 md:mb-0">
