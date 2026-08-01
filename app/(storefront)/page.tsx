@@ -48,7 +48,7 @@ export default async function HomePage() {
             The Silver Button
           </h1>
           <p className="mx-auto mt-4 max-w-[34ch] text-[13px] leading-relaxed text-[#6B5D4D] sm:text-sm md:max-w-xl md:text-base">
-            From field to fabric - every piece passes through six pairs of hands before it
+            Every piece passes through six pairs of hands before it
             reaches yours.
           </p>
         </div>
