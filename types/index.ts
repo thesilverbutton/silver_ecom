@@ -316,6 +316,7 @@ export interface Settings {
   socials: {
     instagram?: string;
     facebook?: string;
+    x?: string;
     whatsapp?: string;
   };
   announcementBar?: {

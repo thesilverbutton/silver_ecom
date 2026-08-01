@@ -12,6 +12,7 @@ export const siteConfig = {
   socials: {
     instagram: "https://www.instagram.com/silver_button.in",
     facebook: "https://www.facebook.com/profile.php?id=61592903033118",
+    x: "https://x.com/silver_buttonin",
     whatsapp: "+91 9315677209",
   },
   shippingOriginPincode: "121001", // Faridabad

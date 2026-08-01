@@ -15,6 +15,7 @@ export interface ISettings extends Document {
   socials: {
     instagram?: string;
     facebook?: string;
+    x?: string;
     whatsapp?: string;
   };
   announcementBar?: {
@@ -46,6 +47,7 @@ const SettingsSchema = new Schema<ISettings>(
     socials: {
       instagram: { type: String },
       facebook: { type: String },
+      x: { type: String },
       whatsapp: { type: String },
     },
     announcementBar: {

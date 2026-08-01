@@ -15,6 +15,7 @@ export const updateSettingsSchema = z.object({
     .object({
       instagram: z.string().url().optional(),
       facebook: z.string().url().optional(),
+      x: z.string().url().optional(),
       whatsapp: z.string().optional(),
     })
     .optional(),
