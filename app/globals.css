@@ -91,6 +91,10 @@
 
   --animate-accordion-down: accordion-down var(--duration-default) ease-out;
   --animate-accordion-up: accordion-up var(--duration-default) ease-out;
+
+  /* Silver button callout */
+  --animate-pulse-ring: tsb-pulse-ring 2.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-sheen: tsb-sheen 3.4s ease-in-out infinite;
 }
 
 @keyframes accordion-down {
@@ -101,6 +105,20 @@
 @keyframes accordion-up {
   from { height: var(--radix-accordion-content-height); }
   to { height: 0; }
+}
+
+/* Concentric ring that radiates out from the button marker. */
+@keyframes tsb-pulse-ring {
+  0%   { transform: scale(0.55); opacity: 0.9; }
+  70%  { opacity: 0; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Specular highlight sweeping across the magnified button, to read as polished metal. */
+@keyframes tsb-sheen {
+  0%   { transform: translateX(-130%) skewX(-18deg); }
+  55%  { transform: translateX(130%) skewX(-18deg); }
+  100% { transform: translateX(130%) skewX(-18deg); }
 }
 
 /* Base layer */

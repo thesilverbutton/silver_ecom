@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { getProductBySlug, getRelatedProducts } from "@/services/product.service";
+import { getCategoryById } from "@/services/category.service";
 import { getCart as getCartService } from "@/services/cart.service";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ProductCard } from "@/components/product/product-card";
@@ -47,11 +48,17 @@ export default async function ProductPage({ params }: PageProps) {
     // No cart cookie or read failed — isInCart stays false
   }
 
-  const related = await getRelatedProducts(
-    String(product._id),
-    String(product.categoryId),
-    8,
-  );
+  const [related, category] = await Promise.all([
+    getRelatedProducts(String(product._id), String(product.categoryId), 8),
+    getCategoryById(String(product.categoryId)),
+  ]);
+
+  // The silver button callout is reserved for the Silver Button Shirts categories
+  // ("men-silver-button-shirts" / "women-silver-button-shirts"). The tag is a
+  // fallback so admin-created products land the treatment even if filed elsewhere.
+  const isSilverButtonShirt =
+    Boolean(category?.slug?.endsWith("silver-button-shirts")) ||
+    (product.tags ?? []).includes("silver-button");
 
   // JSON-LD structured data
   const jsonLd = {
@@ -97,7 +104,11 @@ export default async function ProductPage({ params }: PageProps) {
           ]}
         />
 
-        <ProductDetails product={JSON.parse(JSON.stringify(product))} isInCart={isInCart} />
+        <ProductDetails
+          product={JSON.parse(JSON.stringify(product))}
+          isInCart={isInCart}
+          isSilverButtonShirt={isSilverButtonShirt}
+        />
 
         {/* You may also like */}
         {related.length > 0 && (

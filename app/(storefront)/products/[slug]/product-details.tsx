@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { PriceTag } from "@/components/ui/price-tag";
 import { VariantSelector, type VariantOption } from "@/components/product/variant-selector";
+import { SilverButtonCallout } from "@/components/product/silver-button-callout";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { addToCart } from "@/actions/cart";
 import { RatingStars } from "@/components/ui/rating-stars";
@@ -63,9 +64,15 @@ interface Product {
 interface ProductDetailsProps {
   product: Product;
   isInCart?: boolean;
+  /** Enables the sterling silver button callout over the primary gallery image. */
+  isSilverButtonShirt?: boolean;
 }
 
-function ProductDetails({ product, isInCart = false }: ProductDetailsProps) {
+function ProductDetails({
+  product,
+  isInCart = false,
+  isSilverButtonShirt = false,
+}: ProductDetailsProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isPending, startTransition] = useTransition();
   const [added, setAdded] = useState(isInCart);
@@ -142,6 +149,14 @@ function ProductDetails({ product, isInCart = false }: ProductDetailsProps) {
             <div className="absolute inset-0 flex items-center justify-center bg-muted p-6">
               <span className="text-center text-lg font-medium text-muted-foreground">{product.title}</span>
             </div>
+          )}
+
+          {/*
+            Only on the primary shot — the marker is positioned for the front view, so
+            it would land on nothing once the shopper switches to a back or detail image.
+          */}
+          {isSilverButtonShirt && selectedImage === 0 && product.images[0] && (
+            <SilverButtonCallout />
           )}
         </div>
 

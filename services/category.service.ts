@@ -1,9 +1,17 @@
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import { Category } from "@/models/category.model";
 
 export async function getAllCategories() {
   await connectDB();
   return Category.find({ isActive: true }).sort({ position: 1 }).lean();
+}
+
+/** Guards against a cast error when the id comes from an untrusted/stale reference. */
+export async function getCategoryById(id: string) {
+  await connectDB();
+  if (!mongoose.isValidObjectId(id)) return null;
+  return Category.findById(id).lean();
 }
 
 export async function getCategoryBySlug(slug: string) {
