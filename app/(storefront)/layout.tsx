@@ -10,7 +10,7 @@ export default async function StorefrontLayout({ children }: { children: React.R
   return (
     <>
       <Navbar cartCount={cartCount} navItems={navItems} />
-      <main className="min-h-screen pt-20 pb-16 md:pb-0">{children}</main>
+      <main className="min-h-screen pt-20">{children}</main>
       <Footer navItems={navItems} />
       <MobileNav />
     </>

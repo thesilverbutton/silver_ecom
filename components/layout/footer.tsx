@@ -10,15 +10,17 @@ function Footer({ navItems }: FooterProps) {
   const menLinks = navItems?.find((n) => n.label === "Men")?.children?.filter((l) => l.label !== "All Men") || [];
   const womenLinks = navItems?.find((n) => n.label === "Women")?.children?.filter((l) => l.label !== "All Women") || [];
 
+  // Bottom padding clears the fixed mobile tab bar (h-16) plus the device safe area,
+  // so the copyright row is never hidden behind it on phones.
   return (
-    <footer className="border-t border-border bg-secondary/50 pt-20 pb-10">
-      <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-6 px-5 md:grid-cols-4 md:px-16">
+    <footer className="border-t border-border bg-secondary/50 pt-12 pb-[calc(4rem+env(safe-area-inset-bottom)+1.5rem)] md:pt-20 md:pb-10">
+      <div className="mx-auto grid max-w-[1280px] grid-cols-2 gap-x-6 gap-y-10 px-5 md:grid-cols-4 md:px-16">
         {/* Brand Column */}
-        <div className="col-span-1 mb-6 md:mb-0">
-          <span className="mb-6 block font-[family-name:var(--font-serif)] text-xl font-semibold text-foreground">
+        <div className="col-span-2 md:col-span-1">
+          <span className="mb-3 block font-[family-name:var(--font-serif)] text-lg font-semibold text-foreground md:mb-6 md:text-xl">
             The Silver Button
           </span>
-          <p className="pr-4 text-sm text-muted-foreground">
+          <p className="max-w-sm text-sm text-muted-foreground md:pr-4">
             Crafting Heritage, Sustaining Artistry. Woven with purpose and made to last.
           </p>
         </div>
@@ -82,14 +84,14 @@ function Footer({ navItems }: FooterProps) {
       </div>
 
       {/* Bottom bar */}
-      <div className="mx-auto mt-16 flex max-w-[1280px] flex-col items-center justify-between gap-4 px-5 sm:flex-row md:px-16">
-        <div className="flex items-center gap-3">
+      <div className="mx-auto mt-12 flex max-w-[1280px] flex-col items-center justify-between gap-5 border-t border-border px-5 pt-8 sm:flex-row md:mt-16 md:px-16">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <Image src="/icons/visa-icon.png" alt="Visa" width={48} height={32} style={{ width: "auto", height: "32px" }} />
           <Image src="/icons/master-card-icon.png" alt="Mastercard" width={48} height={32} style={{ width: "auto", height: "32px" }} />
           <Image src="/icons/upi-payment-icon.png" alt="UPI" width={48} height={32} style={{ width: "auto", height: "32px" }} />
           <Image src="/icons/razorpay-icon.png" alt="Razorpay" width={80} height={32} style={{ width: "auto", height: "32px" }} />
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="order-last text-center text-xs text-muted-foreground sm:order-none">
           &copy; {new Date().getFullYear()} The Silver Button. All rights reserved.
         </p>
         <div className="flex items-center gap-3">

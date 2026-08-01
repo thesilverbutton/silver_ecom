@@ -17,7 +17,7 @@ function MobileNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
       aria-label="Mobile navigation"
     >
       <div className="flex h-16 items-center justify-around">

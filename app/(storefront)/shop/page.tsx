@@ -63,9 +63,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Shop" }]} />
 
       {/* Page Header */}
-      <div className="mb-12 mt-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="mb-8 mt-6 flex flex-col gap-4 md:mb-12 md:mt-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="font-[family-name:var(--font-serif)] text-2xl font-semibold text-foreground md:text-3xl">
+          <h1 className="font-[family-name:var(--font-serif)] text-xl font-semibold text-foreground sm:text-2xl md:text-3xl">
             {searchQuery ? `Results for "${searchQuery}"` : "All Products"}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -85,7 +85,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             <EmptyState title="No products found" description="Try adjusting your filters." />
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-6 sm:gap-y-12 lg:grid-cols-3">
                 {result.items.map((product: Record<string, unknown>) => (
                   <ProductCard
                     key={String(product._id)}
@@ -108,7 +108,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
               {/* Pagination */}
               {result.totalPages > 1 && (
-                <div className="mt-20 flex items-center justify-center gap-4">
+                <div className="mt-12 flex items-center justify-center gap-2 sm:gap-4 md:mt-20">
                   <Link
                     href={page > 1 ? `?page=${page - 1}` : "#"}
                     className="flex items-center justify-center p-2 text-muted-foreground transition-colors hover:text-foreground"
@@ -116,7 +116,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </Link>
-                  <div className="flex items-center gap-6 text-sm font-medium">
+                  <div className="flex items-center gap-3 text-sm font-medium sm:gap-6">
                     {Array.from({ length: Math.min(result.totalPages, 5) }, (_, i) => i + 1).map(
                       (p) => (
                         <Link
