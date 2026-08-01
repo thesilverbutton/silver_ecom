@@ -10,7 +10,7 @@ export const siteConfig = {
     phone: "+91 9315677209",
   },
   socials: {
-    instagram: "",
+    instagram: "https://www.instagram.com/silver_button.in",
     facebook: "https://www.facebook.com/profile.php?id=61592903033118",
     whatsapp: "+91 9315677209",
   },

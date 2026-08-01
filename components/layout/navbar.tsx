@@ -70,7 +70,7 @@ function Navbar({ cartCount = 0, className, navItems }: NavbarProps) {
               width={260}
               height={80}
               className="h-14 w-auto max-w-[180px] sm:h-16 sm:max-w-[220px] md:h-20 md:max-w-[260px]"
-              style={{ width: "auto", height: "auto" }}
+              style={{ width: "auto" }}
               sizes="(max-width: 768px) 140px, 260px"
               quality={100}
               priority
@@ -172,7 +172,7 @@ function Navbar({ cartCount = 0, className, navItems }: NavbarProps) {
                   width={220}
                   height={68}
                   className="h-14 w-auto max-w-[160px]"
-                  style={{ width: "auto", height: "auto" }}
+                  style={{ width: "auto" }}
                   sizes="140px"
                   quality={100}
                 />
@@ -256,7 +256,7 @@ function Navbar({ cartCount = 0, className, navItems }: NavbarProps) {
             <div className="border-t border-border bg-secondary/50 p-5">
               <div className="flex justify-center gap-6">
                 <a
-                  href="#"
+                  href="https://www.instagram.com/silver_button.in"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                   aria-label="Instagram"
                 >
