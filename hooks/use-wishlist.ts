@@ -13,8 +13,9 @@ function getSnapshot(): string[] {
   }
 }
 
+const SERVER_SNAPSHOT: string[] = [];
 function getServerSnapshot(): string[] {
-  return [];
+  return SERVER_SNAPSHOT;
 }
 
 /** Storage-event-aware subscribers so multiple tabs stay in sync. */
