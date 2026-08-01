@@ -26,7 +26,7 @@ IMPORTANT CONSIDERATIONS
 • Our courier partners will make up to three attempts to deliver your package before returning it to us.
 • Please ensure your shipping address and contact number are accurate to avoid delays.
 
-For any shipping-related queries, please contact our support team at orders@thesilverbutton.com.`,
+For any shipping-related queries, please contact our support team at enquiry@silverbutton.in.`,
   },
   returns: {
     title: "Returns & Refunds",
@@ -64,7 +64,7 @@ YOUR RIGHTS
 • You have the right to request access to the personal data we hold about you.
 • You may request the deletion or modification of your account and personal information at any time.
 
-If you have any questions or concerns regarding our privacy practices, please contact us at orders@thesilverbutton.com.`,
+If you have any questions or concerns regarding our privacy practices, please contact us at enquiry@silverbutton.in.`,
   },
   terms: {
     title: "Terms & Conditions",

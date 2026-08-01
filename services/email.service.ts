@@ -2,7 +2,7 @@ import { getResend } from "@/lib/resend";
 import { logger } from "@/lib/logger";
 import { formatINR } from "@/lib/utils";
 
-const FROM = process.env.EMAIL_FROM || "The Silver Button <orders@thesilverbutton.com>";
+const FROM = process.env.EMAIL_FROM || "The Silver Button <enquiry@silverbutton.in>";
 
 interface OrderEmailData {
   email: string;

@@ -18,7 +18,7 @@ const serverSchema = z.object({
   RAZORPAY_KEY_SECRET: z.string().optional().default(""),
   RAZORPAY_WEBHOOK_SECRET: z.string().optional().default(""),
   RESEND_API_KEY: z.string().optional().default(""),
-  EMAIL_FROM: z.string().optional().default("The Silver Button <orders@thesilverbutton.com>"),
+  EMAIL_FROM: z.string().optional().default("The Silver Button <enquiry@silverbutton.in>"),
   SHIPROCKET_EMAIL: z.string().optional().default(""),
   SHIPROCKET_PASSWORD: z.string().optional().default(""),
   SHIPROCKET_PICKUP_LOCATION: z.string().optional().default(""),

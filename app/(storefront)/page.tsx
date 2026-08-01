@@ -4,8 +4,9 @@ import { getFeaturedProducts, getBestSellers } from "@/services/product.service"
 import { getCategoriesForGender } from "@/services/category.service";
 import { ProductCard } from "@/components/product/product-card";
 import { ArrowRight } from "lucide-react";
+import { siteImages, PRODUCT_PLACEHOLDER } from "@/lib/images";
 
-const PLACEHOLDER = "https://placehold.co/400x533/e5e7eb/4b5563?text=Product";
+const PLACEHOLDER = PRODUCT_PLACEHOLDER;
 
 /** Mirrors the captions baked into hero_image.png, for legibility on small screens. */
 const CRAFT_STEPS = [
@@ -54,7 +55,7 @@ export default async function HomePage() {
         </div>
 
         <Image
-          src="/hero_image.png"
+          src={siteImages.heroCraftJourney}
           alt="The craft journey: farming, fibre preparation, hand weaving, handcrafting, silver craftsmanship and the finished garment"
           width={1774}
           height={887}
@@ -169,7 +170,7 @@ export default async function HomePage() {
         <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-8 px-5 md:grid-cols-2 md:gap-12 md:px-16">
           <div className="relative aspect-[4/5] overflow-hidden rounded-xl sm:aspect-[3/2] md:aspect-square">
             <Image
-              src="/hero_images/about_m1_u-min.webp"
+              src={siteImages.brandStoryLoom}
               alt="Artisan weaving on a handloom"
               fill
               sizes="(max-width: 768px) 100vw, 50vw"

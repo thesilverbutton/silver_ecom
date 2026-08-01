@@ -53,7 +53,7 @@ export default function ContactPage() {
               <MapPin className="mt-0.5 h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="font-medium">Location</p>
-                <p className="text-sm text-muted-foreground">Faridabad, Haryana, India</p>
+                <p className="text-sm text-muted-foreground">Plot no 3, Sector 135, Noida, Uttar Pradesh 201304</p>
               </div>
             </div>
           </div>

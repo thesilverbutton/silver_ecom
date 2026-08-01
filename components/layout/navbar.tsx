@@ -265,7 +265,7 @@ function Navbar({ cartCount = 0, className, navItems }: NavbarProps) {
                   </svg>
                 </a>
                 <a
-                  href="#"
+                  href="https://www.facebook.com/profile.php?id=61592903033118"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                   aria-label="Facebook"
                 >

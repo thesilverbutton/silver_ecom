@@ -6,13 +6,13 @@ export const siteConfig = {
   currency: "INR" as const,
   locale: "en-IN" as const,
   contact: {
-    email: "orders@thesilverbutton.com",
-    phone: "+91 8130243850",
+    email: "enquiry@silverbutton.in",
+    phone: "+91 9315677209",
   },
   socials: {
     instagram: "",
-    facebook: "",
-    whatsapp: "",
+    facebook: "https://www.facebook.com/profile.php?id=61592903033118",
+    whatsapp: "+91 9315677209",
   },
   shippingOriginPincode: "121001", // Faridabad
 } as const;

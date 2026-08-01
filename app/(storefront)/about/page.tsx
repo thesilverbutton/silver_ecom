@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { siteImages } from "@/lib/images";
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -15,7 +16,7 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="relative h-[45vh] min-h-[280px] w-full sm:h-[55vh] sm:min-h-[380px] md:h-[70vh]">
         <Image
-          src="https://res.cloudinary.com/deht0dsks/image/upload/v1785558822/about_page_image_nhlo8n.png"
+          src={siteImages.aboutHero}
           alt="The Silver Button — Artisan craftsmanship"
           fill
           className="object-cover object-center"

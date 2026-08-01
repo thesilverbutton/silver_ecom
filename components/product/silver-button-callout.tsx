@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { siteImages } from "@/lib/images";
 
 /*
  * Editorial callout that annotates the sterling silver button on a garment photo,
@@ -216,7 +217,7 @@ function SilverButtonCallout({ className }: SilverButtonCalloutProps) {
           style={{ transitionDelay: open ? `${DELAY.medallion}ms` : "0ms" }}
         >
           <Image
-            src="/silver_button.png"
+            src={siteImages.silverButtonMacro}
             alt=""
             fill
             sizes="220px"
