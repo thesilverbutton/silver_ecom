@@ -62,16 +62,16 @@ function Navbar({ cartCount = 0, className, navItems }: NavbarProps) {
             <Menu className="h-5 w-5" />
           </button>
 
-          {/* Left (desktop): Logo */}
+          {/* Left (desktop): Logo — /logo.png is the wordmark trimmed of its
+              surrounding whitespace, so the height below is the actual text height. */}
           <Link href="/" className="shrink-0">
             <Image
-              src="/favicon.png"
+              src="/logo.png"
               alt="The Silver Button"
-              width={260}
-              height={80}
-              className="h-14 w-auto max-w-[180px] sm:h-16 sm:max-w-[220px] md:h-20 md:max-w-[260px]"
-              style={{ width: "auto" }}
-              sizes="(max-width: 768px) 140px, 260px"
+              width={1000}
+              height={141}
+              className="h-5 w-auto sm:h-6 md:h-9 lg:h-10"
+              sizes="(max-width: 768px) 170px, 284px"
               quality={100}
               priority
             />
@@ -167,13 +167,12 @@ function Navbar({ cartCount = 0, className, navItems }: NavbarProps) {
             <div className="flex items-center justify-between border-b border-border px-5 py-6">
               <Link href="/" onClick={() => setMobileOpen(false)}>
                 <Image
-                  src="/favicon.png"
+                  src="/logo.png"
                   alt="The Silver Button"
-                  width={220}
-                  height={68}
-                  className="h-14 w-auto max-w-[160px]"
-                  style={{ width: "auto" }}
-                  sizes="140px"
+                  width={1000}
+                  height={141}
+                  className="h-6 w-auto"
+                  sizes="200px"
                   quality={100}
                 />
               </Link>
