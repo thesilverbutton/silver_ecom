@@ -188,7 +188,6 @@ export default function ComponentsPreview() {
               image={{ url: "https://placehold.co/400x533/e5e7eb/4b5563?text=Shirt", alt: "Cotton shirt" }}
               isBestSeller
               fabric="Handloom Cotton"
-              onWishlistToggle={() => {}}
             />
             <ProductCard
               slug="silk-saree-banarasi"
@@ -197,8 +196,6 @@ export default function ComponentsPreview() {
               image={{ url: "https://placehold.co/400x533/e5e7eb/4b5563?text=Saree", alt: "Saree" }}
               isNewArrival
               fabric="Pure Silk"
-              onWishlistToggle={() => {}}
-              isWishlisted
             />
             <ProductCard
               slug="linen-kurta-men"
@@ -207,7 +204,6 @@ export default function ComponentsPreview() {
               image={{ url: "https://placehold.co/400x533/e5e7eb/4b5563?text=Kurta", alt: "Kurta" }}
               isOutOfStock
               fabric="Linen"
-              onWishlistToggle={() => {}}
             />
             <ProductCard
               slug="block-print-dupatta"
@@ -215,7 +211,6 @@ export default function ComponentsPreview() {
               price={69900}
               image={{ url: "https://placehold.co/400x533/e5e7eb/4b5563?text=Dupatta", alt: "Dupatta" }}
               fabric="Mul Cotton"
-              onWishlistToggle={() => {}}
             />
           </div>
         </PreviewSection>

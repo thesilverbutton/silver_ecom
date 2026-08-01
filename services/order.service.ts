@@ -3,7 +3,6 @@
 import { connectDB } from "@/lib/db";
 import { Order } from "@/models/order.model";
 import { Product } from "@/models/product.model";
-import { Coupon } from "@/models/coupon.model";
 import { logger } from "@/lib/logger";
 import type { ResolvedCart } from "@/services/cart.service";
 
@@ -71,7 +70,6 @@ export async function createOrder(input: CreateOrderInput) {
     shippingAddress: input.shippingAddress,
     subtotal: input.cart.totals.subtotal,
     discountTotal: input.cart.totals.discountTotal,
-    couponCode: input.cart.couponCode,
     shippingTotal: input.cart.totals.shippingTotal,
     taxTotal: input.cart.totals.taxTotal,
     grandTotal: input.cart.totals.grandTotal,
@@ -134,14 +132,6 @@ export async function finalizeOrder(orderId: string, traceId?: string) {
   if (oversold.length > 0) {
     order.notes = `needs_review:oversold - ${oversold.join(", ")}`;
     logger.warn("Order has oversold items", { orderId, oversold }, traceId);
-  }
-
-  // Commit coupon redemption
-  if (order.couponCode) {
-    await Coupon.updateOne(
-      { code: order.couponCode, $or: [{ usageLimit: { $exists: false } }, { $expr: { $lt: ["$usageCount", "$usageLimit"] } }] },
-      { $inc: { usageCount: 1 } },
-    );
   }
 
   await order.save();

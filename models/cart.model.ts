@@ -11,7 +11,6 @@ export interface ICart extends Document {
   cartId?: string;
   customerId?: mongoose.Types.ObjectId;
   items: ICartItem[];
-  couponCode?: string;
   updatedAt: Date;
 }
 
@@ -30,7 +29,6 @@ const CartSchema = new Schema<ICart>(
     cartId: { type: String },
     customerId: { type: Schema.Types.ObjectId, ref: "Customer" },
     items: [CartItemSchema],
-    couponCode: { type: String },
   },
   { timestamps: true },
 );

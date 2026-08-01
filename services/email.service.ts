@@ -52,7 +52,6 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
     logger.info("Order confirmation email sent", { email: data.email, orderNumber: data.orderNumber });
   } catch (err) {
     logger.error("Failed to send confirmation email", { email: data.email, error: String(err) });
-    // Don't throw — email failure shouldn't break the order flow
   }
 }
 

@@ -13,6 +13,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { addToCart } from "@/actions/cart";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Separator } from "@/components/ui/separator";
+import { useWishlist } from "@/hooks/use-wishlist";
 
 interface ProductImage {
   url: string;
@@ -273,7 +274,7 @@ function ProductDetails({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           {added ? (
             <Link
               href="/cart"
@@ -306,6 +307,9 @@ function ProductDetails({
               )}
             </Button>
           )}
+
+          {/* Wishlist */}
+          <WishlistButton slug={product.slug} />
         </div>
 
         {/* Shipping Promises */}
@@ -381,3 +385,25 @@ function ProductDetails({
 }
 
 export { ProductDetails };
+
+/** Standalone wishlist toggle used in the product detail actions row. */
+function WishlistButton({ slug }: { slug: string }) {
+  const { toggle, isWishlisted } = useWishlist();
+  const active = isWishlisted(slug);
+
+  return (
+    <button
+      type="button"
+      onClick={() => toggle(slug)}
+      className={cn(
+        "flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border transition-colors",
+        active
+          ? "border-destructive/30 bg-destructive/5 text-destructive"
+          : "border-border text-muted-foreground hover:border-foreground hover:text-foreground",
+      )}
+      aria-label={active ? "Remove from wishlist" : "Save to wishlist"}
+    >
+      <Heart className={cn("h-5 w-5 transition-transform", active && "scale-110 fill-current")} />
+    </button>
+  );
+}

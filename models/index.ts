@@ -5,7 +5,6 @@ export { AdminUser } from "./admin-user.model";
 export { Order } from "./order.model";
 export { Payment } from "./payment.model";
 export { Review } from "./review.model";
-export { Coupon } from "./coupon.model";
 export { Settings } from "./settings.model";
 export { AuditLog } from "./audit-log.model";
 export { Cart } from "./cart.model";

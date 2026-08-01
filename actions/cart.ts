@@ -9,8 +9,6 @@ import {
   updateCartItem as updateCartItemService,
   removeCartItem as removeCartItemService,
   clearCart as clearCartService,
-  applyCoupon as applyCouponService,
-  removeCoupon as removeCouponService,
   getCartItemCount,
 } from "@/services/cart.service";
 
@@ -66,20 +64,6 @@ export async function removeCartItem(productId: string, variantId?: string) {
 export async function clearCart() {
   const cartId = await getOrCreateCartId();
   const result = await clearCartService(cartId);
-  revalidatePath("/", "layout");
-  return result;
-}
-
-export async function applyCoupon(code: string) {
-  const cartId = await getOrCreateCartId();
-  const result = await applyCouponService(cartId, code);
-  revalidatePath("/", "layout");
-  return result;
-}
-
-export async function removeCoupon() {
-  const cartId = await getOrCreateCartId();
-  const result = await removeCouponService(cartId);
   revalidatePath("/", "layout");
   return result;
 }

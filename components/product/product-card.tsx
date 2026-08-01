@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PriceTag } from "@/components/ui/price-tag";
+import { useWishlist } from "@/hooks/use-wishlist";
 
 interface ProductCardProps {
   slug: string;
@@ -18,8 +19,6 @@ interface ProductCardProps {
   isBestSeller?: boolean;
   isNewArrival?: boolean;
   fabric?: string;
-  onWishlistToggle?: () => void;
-  isWishlisted?: boolean;
   className?: string;
 }
 
@@ -34,12 +33,13 @@ function ProductCard({
   isBestSeller = false,
   isNewArrival = false,
   fabric,
-  onWishlistToggle,
-  isWishlisted = false,
   className,
 }: ProductCardProps) {
   const [imgError, setImgError] = useState(false);
   const [secondImgError, setSecondImgError] = useState(false);
+  const { toggle, isWishlisted } = useWishlist();
+
+  const wishlisted = isWishlisted(slug);
 
   return (
     <div className={cn("group flex cursor-pointer flex-col", className)}>
@@ -100,22 +100,28 @@ function ProductCard({
           )}
         </div>
 
-        {/* Wishlist - top right */}
-        {onWishlistToggle && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              onWishlistToggle();
-            }}
-            className="absolute right-3 top-3 rounded-full bg-background/50 p-1 text-foreground backdrop-blur-sm transition-colors hover:text-destructive"
-            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          >
-            <Heart
-              className={cn("h-4 w-4", isWishlisted && "fill-destructive text-destructive")}
-            />
-          </button>
-        )}
+        {/* Wishlist - top right (always visible) */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggle(slug);
+          }}
+          className={cn(
+            "absolute right-3 top-3 rounded-full p-1.5 backdrop-blur-sm transition-all",
+            wishlisted
+              ? "bg-white/90 text-destructive"
+              : "bg-background/50 text-foreground opacity-0 group-hover:opacity-100 sm:opacity-0",
+            // Always show on touch (no hover), show filled state always
+            wishlisted && "!opacity-100",
+          )}
+          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart
+            className={cn("h-4 w-4 transition-transform", wishlisted && "scale-110 fill-destructive text-destructive")}
+          />
+        </button>
       </Link>
 
       {/* Product info */}

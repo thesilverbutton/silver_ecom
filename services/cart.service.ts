@@ -1,7 +1,6 @@
 import { connectDB } from "@/lib/db";
 import { Cart } from "@/models/cart.model";
 import { Product } from "@/models/product.model";
-import { Coupon } from "@/models/coupon.model";
 import { computeTotals, type CartTotals } from "@/lib/pricing";
 
 export interface ResolvedCartItem {
@@ -21,8 +20,6 @@ export interface ResolvedCartItem {
 export interface ResolvedCart {
   id: string;
   items: ResolvedCartItem[];
-  couponCode?: string;
-  couponError?: string;
   totals: CartTotals;
   valid: boolean; // false if any item has a flag
 }
@@ -114,15 +111,13 @@ export async function getCart(cartId?: string, customerId?: string): Promise<Res
     });
   }
 
-  // Compute totals with coupon
-  const totals = await computeTotals(resolvedItems, cart.couponCode || undefined);
+  // Compute totals
+  const totals = computeTotals(resolvedItems);
   const valid = !resolvedItems.some((i) => i.flag);
 
   return {
     id: String(cart._id),
     items: resolvedItems,
-    couponCode: cart.couponCode || undefined,
-    couponError: totals.couponError,
     totals,
     valid,
   };
@@ -240,38 +235,7 @@ export async function removeCartItem(
  */
 export async function clearCart(cartId: string): Promise<{ success: boolean }> {
   await connectDB();
-  await Cart.updateOne({ cartId }, { $set: { items: [], couponCode: null } });
-  return { success: true };
-}
-
-/**
- * Apply a coupon code to the cart.
- */
-export async function applyCoupon(
-  cartId: string,
-  code: string,
-): Promise<{ success: boolean; error?: string }> {
-  await connectDB();
-
-  const coupon = await Coupon.findOne({ code: code.toUpperCase(), isActive: true }).lean();
-  if (!coupon) return { success: false, error: "Invalid coupon code" };
-
-  const now = new Date();
-  if (coupon.startsAt && now < coupon.startsAt) return { success: false, error: "Coupon not yet active" };
-  if (coupon.expiresAt && now > coupon.expiresAt) return { success: false, error: "Coupon has expired" };
-  if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit)
-    return { success: false, error: "Coupon usage limit reached" };
-
-  await Cart.updateOne({ cartId }, { $set: { couponCode: code.toUpperCase() } });
-  return { success: true };
-}
-
-/**
- * Remove applied coupon from cart.
- */
-export async function removeCoupon(cartId: string): Promise<{ success: boolean }> {
-  await connectDB();
-  await Cart.updateOne({ cartId }, { $unset: { couponCode: 1 } });
+  await Cart.updateOne({ cartId }, { $set: { items: [] } });
   return { success: true };
 }
 
