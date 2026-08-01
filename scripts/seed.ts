@@ -6,25 +6,8 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
-import fs from "node:fs";
-import path from "node:path";
 
-// Target env is selectable so the same seed can bootstrap production:
-//   npx tsx scripts/seed.ts .env.production
-const ENV_FILE = process.argv[2] || ".env";
-dotenv.config({ path: ENV_FILE });
-
-interface ManifestEntry {
-  url: string;
-  publicId: string;
-  width: number;
-  height: number;
-}
-
-const MANIFEST_PATH = path.join(process.cwd(), "scripts", "image-manifest.json");
-const imageManifest: Record<string, ManifestEntry> = fs.existsSync(MANIFEST_PATH)
-  ? JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf8"))
-  : {};
+dotenv.config({ path: ".env" });
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const MONGODB_DB = process.env.MONGODB_DB || "silver_button";
@@ -37,7 +20,7 @@ if (!MONGODB_URI || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
 }
 
 async function seed() {
-  console.log(`🌱 Connecting to MongoDB (env: ${ENV_FILE})...`);
+  console.log("🌱 Connecting to MongoDB...");
   await mongoose.connect(MONGODB_URI!, { dbName: MONGODB_DB });
   console.log("✅ Connected to", MONGODB_DB);
 
@@ -150,7 +133,7 @@ async function seed() {
     await Settings.create({
       storeName: "The Silver Button",
       supportEmail: "enquiry@silverbutton.in",
-      supportPhone: "+91 9315677209",
+      supportPhone: "+91 8130243850",
       currency: "INR",
       gstEnabled: false,
       flatShippingRate: 0,
@@ -185,29 +168,15 @@ async function seed() {
     const womenCalligraphed = await Category.findOne({ slug: "women-calligraphed-linen-shirts" });
     const womenSilverButton = await Category.findOne({ slug: "women-silver-button-shirts" });
 
-    /**
-     * Resolves a filename to its Cloudinary asset via scripts/image-manifest.json.
-     *
-     * Product images are served from Cloudinary, never from /public. The manifest is
-     * produced by `npm run migrate:images -- --apply`; if a filename is missing from
-     * it we fail loudly rather than seeding a dead local path.
-     */
-    const productImg = (filename: string, alt: string, position = 0) => {
-      const entry = imageManifest[`/product_Images/${filename}`];
-      if (!entry) {
-        throw new Error(
-          `No Cloudinary mapping for "${filename}". Run: npm run migrate:images -- --apply`,
-        );
-      }
-      return {
-        url: entry.url,
-        publicId: entry.publicId,
-        alt,
-        width: entry.width,
-        height: entry.height,
-        position,
-      };
-    };
+    // Image helper — uses real uploaded images from /public/product_Images/
+    const productImg = (path: string, alt: string, position = 0) => ({
+      url: `/product_Images/${path}`,
+      publicId: path.replace(/\.\w+$/, ""),
+      alt,
+      width: 800,
+      height: 1067,
+      position,
+    });
 
     const dummyProducts = [
       // --- MEN: Linen Shirts ---
