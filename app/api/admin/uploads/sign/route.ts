@@ -1,4 +1,5 @@
 import { cloudinary } from "@/lib/cloudinary";
+import { auth } from "@/lib/auth";
 
 /**
  * Returns a signed Cloudinary upload payload.
@@ -6,6 +7,14 @@ import { cloudinary } from "@/lib/cloudinary";
  */
 export async function POST() {
   try {
+    const session = await auth();
+    if (!session || !["admin", "staff"].includes(session.user.role)) {
+      return Response.json(
+        { ok: false, error: { code: "UNAUTHORIZED", message: "Unauthorized" } },
+        { status: 401 }
+      );
+    }
+
     const timestamp = Math.round(Date.now() / 1000);
     const folder = "products";
 

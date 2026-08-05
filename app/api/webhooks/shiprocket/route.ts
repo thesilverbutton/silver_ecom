@@ -10,6 +10,14 @@ export async function POST(request: NextRequest) {
   const traceId = generateTraceId();
 
   try {
+    const signature = request.headers.get("x-api-key");
+    const secret = process.env.SHIPROCKET_WEBHOOK_SECRET;
+
+    if (!secret || signature !== secret) {
+      logger.error("Shiprocket webhook signature invalid", { traceId });
+      return Response.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
+    }
+
     const payload = await request.json();
     logger.info("Shiprocket webhook received", { payload: JSON.stringify(payload).slice(0, 500) }, traceId);
 

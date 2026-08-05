@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     qualities: [25, 38, 50, 60, 70, 75, 80, 85, 90, 95, 100],
     remotePatterns: [
       {

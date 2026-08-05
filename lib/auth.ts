@@ -99,7 +99,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: admin.name,
           email: admin.email,
           role: admin.role,
-          permissions: admin.permissions,
+          permissions: admin.permissions ? Array.from(admin.permissions) : [],
         };
       },
     }),
