@@ -7,6 +7,7 @@ import { getCashfree, getCashfreeMode } from "@/lib/cashfree";
 import { finalizeOrder } from "@/services/order.service";
 import { sendOrderConfirmation } from "@/services/email.service";
 import { logger } from "@/lib/logger";
+import { PaymentError } from "@/lib/errors";
 
 function sanitizePhone(phone?: string): string {
   const digits = (phone || "").replace(/\D/g, "");
@@ -69,7 +70,21 @@ export async function createCashfreeOrder(
     order_note: `Order ${orderNumber}`,
   };
 
-  const response = await cashfree.PGCreateOrder(request);
+  let response;
+  try {
+    response = await cashfree.PGCreateOrder(request);
+  } catch (error) {
+    const err = error as { message?: string; response?: { data?: { message?: string } } };
+    logger.error("Cashfree PGCreateOrder failed", { 
+      message: err.message, 
+      data: err.response?.data 
+    });
+    
+    // Throw a PaymentError which is exposed to the client
+    const cfMessage = err.response?.data?.message || err.message || "Unknown error";
+    throw new PaymentError(`Cashfree API Error: ${cfMessage}`);
+  }
+
   const cfData = response.data;
 
   // Create payment record in database
