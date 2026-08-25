@@ -51,7 +51,13 @@ export async function createCashfreeOrder(
   const sanitizedOrderNumber = orderNumber.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 35);
   const cashfreeOrderId = `${sanitizedOrderNumber}_${Date.now().toString().slice(-6)}`;
 
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL !== "http://localhost:3000" 
+    ? process.env.NEXT_PUBLIC_APP_URL 
+    : (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) || 
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) || 
+      "http://localhost:3000";
+      
+  const appUrl = envUrl.replace(/\/$/, "");
 
   const request = {
     order_id: cashfreeOrderId,
