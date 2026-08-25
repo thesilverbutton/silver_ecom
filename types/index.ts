@@ -241,10 +241,11 @@ export interface PaymentRefund {
 export interface Payment {
   _id: string;
   orderId: string;
-  provider: "razorpay";
-  razorpayOrderId: string;
-  razorpayPaymentId?: string;
-  razorpaySignature?: string;
+  provider: "cashfree";
+  cashfreeOrderId?: string;
+  cfOrderId?: string;
+  cfPaymentId?: string;
+  paymentSessionId?: string;
   amount: number;
   currency: string;
   status: "created" | "authorized" | "captured" | "failed" | "refunded" | "partially_refunded";

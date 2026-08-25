@@ -90,7 +90,6 @@ function Footer({ navItems }: FooterProps) {
           <Image src="/icons/visa-icon.png" alt="Visa" width={48} height={32} style={{ width: "auto", height: "auto" }} />
           <Image src="/icons/master-card-icon.png" alt="Mastercard" width={48} height={32} style={{ width: "auto", height: "auto" }} />
           <Image src="/icons/upi-payment-icon.png" alt="UPI" width={48} height={32} style={{ width: "auto", height: "auto" }} />
-          <Image src="/icons/razorpay-icon.png" alt="Razorpay" width={80} height={32} style={{ width: "auto", height: "auto" }} />
         </div>
         <p className="order-last text-center text-xs text-muted-foreground sm:order-none">
           &copy; {new Date().getFullYear()} The Silver Button. All rights reserved.

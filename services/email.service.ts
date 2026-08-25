@@ -17,6 +17,10 @@ interface OrderEmailData {
  */
 export async function sendOrderConfirmation(data: OrderEmailData) {
   try {
+    if (!process.env.RESEND_API_KEY) {
+      logger.info("Order confirmation email skipped (RESEND_API_KEY not set)", { orderNumber: data.orderNumber });
+      return;
+    }
     const resend = getResend();
 
     const itemsHtml = data.items

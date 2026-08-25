@@ -1,144 +1,317 @@
 import { createHmac } from "crypto";
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import { Payment } from "@/models/payment.model";
-import { getRazorpay } from "@/lib/razorpay";
+import { Order } from "@/models/order.model";
+import { getCashfree, getCashfreeMode } from "@/lib/cashfree";
+import { finalizeOrder } from "@/services/order.service";
+import { sendOrderConfirmation } from "@/services/email.service";
 import { logger } from "@/lib/logger";
 
+function sanitizePhone(phone?: string): string {
+  const digits = (phone || "").replace(/\D/g, "");
+  if (digits.length >= 10) {
+    return digits.slice(-10);
+  }
+  return "9999999999";
+}
+
+function sanitizeCustomerId(id: string): string {
+  return id.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 50) || "customer_guest";
+}
+
+function isMongoObjectId(val?: string): boolean {
+  if (!val || typeof val !== "string") return false;
+  return /^[0-9a-fA-F]{24}$/.test(val) && mongoose.Types.ObjectId.isValid(val);
+}
+
+interface CustomerPayload {
+  name?: string;
+  email: string;
+  phone: string;
+}
+
 /**
- * Create a Razorpay order and a Payment record.
+ * Create a Cashfree order and a Payment record.
  */
-export async function createRazorpayOrder(orderId: string, amount: number, orderNumber: string) {
+export async function createCashfreeOrder(
+  orderId: string,
+  amountPaise: number,
+  orderNumber: string,
+  customer: CustomerPayload,
+) {
   await connectDB();
-  const razorpay = getRazorpay();
+  const cashfree = getCashfree();
 
-  // amount must be in paise and >= 100
-  const safeAmount = Math.max(amount, 100);
+  // Convert paise to rupees (decimal) — minimum ₹1.00
+  const orderAmountRupees = Math.max(Number((amountPaise / 100).toFixed(2)), 1.0);
 
-  const rpOrder = await razorpay.orders.create({
-    amount: safeAmount,
-    currency: "INR",
-    receipt: orderNumber,
-    notes: { orderId, orderNumber },
-  });
+  // Generate unique alphanumeric Cashfree order ID
+  const sanitizedOrderNumber = orderNumber.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 35);
+  const cashfreeOrderId = `${sanitizedOrderNumber}_${Date.now().toString().slice(-6)}`;
 
-  // Create payment record
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "");
+
+  const request = {
+    order_id: cashfreeOrderId,
+    order_amount: orderAmountRupees,
+    order_currency: "INR",
+    customer_details: {
+      customer_id: sanitizeCustomerId(customer.email || orderId),
+      customer_phone: sanitizePhone(customer.phone),
+      customer_email: customer.email || "customer@thesilverbutton.com",
+      customer_name: customer.name || "Valued Customer",
+    },
+    order_meta: {
+      return_url: `${appUrl}/checkout/success?order=${orderNumber}&order_id={order_id}`,
+      notify_url: `${appUrl}/api/webhooks/cashfree`,
+    },
+    order_note: `Order ${orderNumber}`,
+  };
+
+  const response = await cashfree.PGCreateOrder(request);
+  const cfData = response.data;
+
+  // Create payment record in database
   const payment = await Payment.create({
-    orderId,
-    provider: "razorpay",
-    razorpayOrderId: rpOrder.id,
-    amount: safeAmount,
+    orderId: new mongoose.Types.ObjectId(orderId),
+    provider: "cashfree",
+    cashfreeOrderId: cfData.order_id,
+    cfOrderId: cfData.cf_order_id ? String(cfData.cf_order_id) : undefined,
+    paymentSessionId: cfData.payment_session_id,
+    amount: amountPaise,
     currency: "INR",
     status: "created",
     webhookEvents: [],
     refunds: [],
   });
 
-  logger.info("Razorpay order created", {
-    razorpayOrderId: rpOrder.id,
+  logger.info("Cashfree order created", {
+    cashfreeOrderId: cfData.order_id,
+    cfOrderId: cfData.cf_order_id,
     orderId,
-    amount: safeAmount,
+    amountPaise,
+    amountRupees: orderAmountRupees,
   });
 
   return {
-    razorpayOrderId: rpOrder.id,
-    amount: safeAmount,
+    cashfreeOrderId: cfData.order_id,
+    cfOrderId: cfData.cf_order_id ? String(cfData.cf_order_id) : undefined,
+    paymentSessionId: cfData.payment_session_id,
+    amount: amountPaise,
     currency: "INR",
     paymentId: String(payment._id),
+    mode: getCashfreeMode(),
   };
 }
 
-/**
- * Verify Razorpay payment signature (client callback).
- * HMAC-SHA256(order_id + "|" + payment_id, KEY_SECRET)
- */
-export function verifyPaymentSignature(
-  razorpayOrderId: string,
-  razorpayPaymentId: string,
-  razorpaySignature: string,
-): boolean {
-  const secret = process.env.RAZORPAY_KEY_SECRET;
-  if (!secret) throw new Error("RAZORPAY_KEY_SECRET not configured");
 
-  const body = `${razorpayOrderId}|${razorpayPaymentId}`;
-  const expectedSignature = createHmac("sha256", secret).update(body).digest("hex");
-
-  return expectedSignature === razorpaySignature;
-}
 
 /**
- * Verify Razorpay webhook signature.
- * HMAC-SHA256(raw_body, WEBHOOK_SECRET)
+ * Verify Cashfree payment status on the backend using PGFetchOrder.
+ * Fulfills the rule: Never trust client-side callbacks, always re-fetch order status from server.
  */
-export function verifyWebhookSignature(rawBody: string, signature: string): boolean {
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  if (!secret) {
-    logger.warn("RAZORPAY_WEBHOOK_SECRET not set, skipping webhook signature check");
-    return true; // In dev without webhook secret, allow through
+export async function verifyCashfreePayment(orderIdOrNumber: string) {
+  await connectDB();
+  const cashfree = getCashfree();
+
+  // Safely construct query conditions without triggering ObjectId CastError
+  const orConditions: Record<string, unknown>[] = [
+    { cashfreeOrderId: orderIdOrNumber },
+    { cfOrderId: orderIdOrNumber },
+  ];
+
+  if (isMongoObjectId(orderIdOrNumber)) {
+    orConditions.push({ orderId: new mongoose.Types.ObjectId(orderIdOrNumber) });
   }
 
-  const expectedSignature = createHmac("sha256", secret).update(rawBody).digest("hex");
-  return expectedSignature === signature;
+  let payment = await Payment.findOne({ $or: orConditions });
+
+  // If not directly found on payment, try resolving orderId from Order collection by orderNumber
+  if (!payment) {
+    const orderQuery: Record<string, unknown>[] = [{ orderNumber: orderIdOrNumber }];
+    if (isMongoObjectId(orderIdOrNumber)) {
+      orderQuery.push({ _id: new mongoose.Types.ObjectId(orderIdOrNumber) });
+    }
+    const order = await Order.findOne({ $or: orderQuery });
+    if (order) {
+      payment = await Payment.findOne({ orderId: order._id }).sort({ createdAt: -1 });
+    }
+  }
+
+  if (!payment) {
+    logger.warn("Payment record not found for verification", { orderIdOrNumber });
+    return { verified: false, status: "NOT_FOUND", payment: null };
+  }
+
+  const lookupOrderId = payment.cashfreeOrderId || orderIdOrNumber;
+  try {
+    const response = await cashfree.PGFetchOrder(lookupOrderId);
+    const orderData = response.data;
+
+    const isPaid = orderData.order_status === "PAID";
+
+    if (isPaid) {
+      // Fetch payment details to extract cf_payment_id and payment method
+      try {
+        const paymentsResponse = await cashfree.PGOrderFetchPayments(lookupOrderId);
+        const paymentsList = paymentsResponse.data;
+        if (Array.isArray(paymentsList) && paymentsList.length > 0) {
+          const successfulPayment = paymentsList.find((p) => p.payment_status === "SUCCESS") || paymentsList[0];
+          if (successfulPayment) {
+            payment.cfPaymentId = successfulPayment.cf_payment_id ? String(successfulPayment.cf_payment_id) : undefined;
+            payment.method = successfulPayment.payment_group || (successfulPayment.payment_method ? JSON.stringify(successfulPayment.payment_method) : undefined);
+          }
+        }
+      } catch (fetchPaymentErr) {
+        logger.warn("Could not fetch payment details for order", { lookupOrderId, error: String(fetchPaymentErr) });
+      }
+
+      payment.status = "captured";
+      await payment.save();
+
+      // Finalize order atomically and send confirmation email if not yet finalized
+      try {
+        const order = await Order.findById(payment.orderId);
+        if (order && order.status !== "paid") {
+          await finalizeOrder(String(order._id));
+
+          sendOrderConfirmation({
+            email: order.email,
+            orderNumber: order.orderNumber,
+            items: order.items.map((i) => ({ title: i.title, quantity: i.quantity, lineTotal: i.lineTotal })),
+            grandTotal: order.grandTotal,
+            shippingAddress: order.shippingAddress,
+          }).catch((err) => {
+            logger.warn("Order confirmation email failed to send", { orderNumber: order.orderNumber, error: String(err) });
+          });
+
+          logger.info("Order finalized upon server verification", { orderNumber: order.orderNumber, lookupOrderId });
+        }
+      } catch (finalizeErr) {
+        logger.error("Error finalizing order upon payment verification", { lookupOrderId, error: String(finalizeErr) });
+      }
+    }
+
+    logger.info("Payment verified with Cashfree", {
+      lookupOrderId,
+      orderStatus: orderData.order_status,
+      isPaid,
+    });
+
+    return {
+      verified: isPaid,
+      status: orderData.order_status,
+      payment,
+    };
+  } catch (error) {
+    logger.error("Failed to fetch order from Cashfree", { lookupOrderId, error: String(error) });
+    return { verified: false, status: "ERROR", payment, error: String(error) };
+  }
 }
 
 /**
- * Update payment record after client verification.
- * Does NOT finalize the order — that happens in the webhook.
+ * Verify Cashfree webhook signature.
+ * Formula: HMAC-SHA256(timestamp + rawBody, clientSecret) -> base64
+ */
+export function verifyWebhookSignature(rawBody: string, signature: string, timestamp: string = ""): boolean {
+  const secret = process.env.CASHFREE_SECRET_KEY;
+
+  if (!secret) {
+    logger.warn("Webhook secret not set, skipping webhook signature check");
+    return true; // In development without secret, allow through
+  }
+
+  // Cashfree signature verification: HMAC-SHA256(timestamp + rawBody, secret) -> base64
+  const payloadToSign = timestamp ? timestamp + rawBody : rawBody;
+  const base64Sig = createHmac("sha256", secret).update(payloadToSign).digest("base64");
+  if (base64Sig === signature) return true;
+
+  // Hex fallback for legacy webhooks
+  const hexSig = createHmac("sha256", secret).update(rawBody).digest("hex");
+  return hexSig === signature;
+}
+
+/**
+ * Mark payment verified (provisional client-side acknowledgment).
  */
 export async function markPaymentVerified(
-  razorpayOrderId: string,
-  razorpayPaymentId: string,
-  razorpaySignature: string,
+  orderRef: string,
+  cfPaymentId?: string,
 ) {
   await connectDB();
 
+  const orConditions: Record<string, unknown>[] = [
+    { cashfreeOrderId: orderRef },
+    { cfOrderId: orderRef },
+  ];
+
+  if (isMongoObjectId(orderRef)) {
+    orConditions.push({ orderId: new mongoose.Types.ObjectId(orderRef) });
+  }
+
   await Payment.updateOne(
-    { razorpayOrderId },
+    { $or: orConditions },
     {
       $set: {
-        razorpayPaymentId,
-        razorpaySignature,
+        cfPaymentId,
       },
     },
   );
 
-  logger.info("Payment signature verified (client)", { razorpayOrderId, razorpayPaymentId });
+  logger.info("Payment marked verified (client)", { orderRef, cfPaymentId });
 }
 
 /**
- * Handle webhook event — mark payment captured/failed.
- * Returns the payment record for further processing.
+ * Handle Cashfree webhook events (e.g. PAYMENT_SUCCESS_WEBHOOK, PAYMENT_FAILED_WEBHOOK, REFUND_STATUS_WEBHOOK).
  */
-export async function handleWebhookPaymentEvent(
-  event: string,
-  razorpayOrderId: string,
-  razorpayPaymentId: string,
+export async function handleWebhookCashfreeEvent(
+  eventType: string,
+  cashfreeOrderId: string,
+  cfPaymentId?: string,
   method?: string,
 ) {
   await connectDB();
 
-  const payment = await Payment.findOne({ razorpayOrderId });
+  const orConditions: Record<string, unknown>[] = [
+    { cashfreeOrderId },
+    { cfOrderId: cashfreeOrderId },
+  ];
+
+  if (isMongoObjectId(cashfreeOrderId)) {
+    orConditions.push({ orderId: new mongoose.Types.ObjectId(cashfreeOrderId) });
+  }
+
+  const payment = await Payment.findOne({ $or: orConditions });
+
   if (!payment) {
-    logger.error("Webhook: payment not found", { razorpayOrderId });
+    logger.error("Webhook: payment not found", { cashfreeOrderId });
     return null;
   }
 
   // Idempotent — skip if already processed
-  if (payment.status === "captured" && event.includes("captured")) {
-    logger.info("Webhook: already processed", { razorpayOrderId, event });
+  if (payment.status === "captured" && (eventType === "PAYMENT_SUCCESS_WEBHOOK" || eventType.includes("captured"))) {
+    logger.info("Webhook: already processed", { cashfreeOrderId, eventType });
     return payment;
   }
 
   // Record webhook event
-  payment.webhookEvents.push({ event, at: new Date(), verified: true });
+  payment.webhookEvents.push({ event: eventType, at: new Date(), verified: true });
 
-  if (event === "payment.captured" || event === "order.paid") {
+  if (eventType === "PAYMENT_SUCCESS_WEBHOOK" || eventType === "payment.captured" || eventType === "order.paid") {
     payment.status = "captured";
-    payment.razorpayPaymentId = razorpayPaymentId;
-    payment.method = method;
-  } else if (event === "payment.failed") {
+    if (cfPaymentId) payment.cfPaymentId = String(cfPaymentId);
+    if (method) payment.method = method;
+  } else if (
+    eventType === "PAYMENT_FAILED_WEBHOOK" ||
+    eventType === "PAYMENT_USER_DROPPED_WEBHOOK" ||
+    eventType === "payment.failed"
+  ) {
     payment.status = "failed";
   }
 
   await payment.save();
   return payment;
 }
+
+

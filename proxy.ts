@@ -7,11 +7,42 @@ import { getToken } from "next-auth/jwt";
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const isHttps = request.nextUrl.protocol === "https:";
 
-  const token = await getToken({
+  // Try standard getToken with protocol-aware secureCookie flag
+  let token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
+    secureCookie: isHttps,
   });
+
+  // Fallback if secureCookie flag is inverted or in mixed dev/prod environment
+  if (!token) {
+    token = await getToken({
+      req: request,
+      secret: process.env.AUTH_SECRET,
+      secureCookie: !isHttps,
+    });
+  }
+
+  // Fallback by checking present cookie names directly
+  if (!token) {
+    const rawCookieName =
+      request.cookies.get("__Secure-authjs.session-token") ? "__Secure-authjs.session-token"
+      : request.cookies.get("authjs.session-token") ? "authjs.session-token"
+      : request.cookies.get("__Secure-next-auth.session-token") ? "__Secure-next-auth.session-token"
+      : request.cookies.get("next-auth.session-token") ? "next-auth.session-token"
+      : null;
+
+    if (rawCookieName) {
+      token = await getToken({
+        req: request,
+        secret: process.env.AUTH_SECRET,
+        cookieName: rawCookieName,
+        salt: rawCookieName,
+      });
+    }
+  }
 
   // Protect /account/* — require any authenticated user
   if (pathname.startsWith("/account")) {

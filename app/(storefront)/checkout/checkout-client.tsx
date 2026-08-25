@@ -30,9 +30,15 @@ interface CheckoutClientProps {
 
 declare global {
   interface Window {
-    Razorpay: new (options: Record<string, unknown>) => {
-      open: () => void;
-      on: (event: string, handler: (response: Record<string, unknown>) => void) => void;
+    Cashfree?: (options: { mode: "sandbox" | "production" }) => {
+      checkout: (options: {
+        paymentSessionId: string;
+        redirectTarget?: "_modal" | "_self" | "_top" | "_blank";
+      }) => Promise<{
+        error?: { message?: string; code?: string };
+        redirect?: boolean;
+        paymentDetails?: Record<string, unknown>;
+      }>;
     };
   }
 }
@@ -75,7 +81,7 @@ function CheckoutClient({ cart, savedAddresses = [], userEmail = "", userPhone =
 
     startTransition(async () => {
       try {
-        // Step 1: Create order + Razorpay order
+        // Step 1: Create order + Cashfree session
         const res = await fetch("/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -101,62 +107,84 @@ function CheckoutClient({ cart, savedAddresses = [], userEmail = "", userPhone =
           return;
         }
 
-        // Step 2: Open Razorpay Checkout modal
-        const options = {
-          key: data.data.keyId,
-          amount: data.data.amount,
-          currency: data.data.currency,
-          name: "The Silver Button",
-          description: `Order ${data.data.orderNumber}`,
-          order_id: data.data.razorpayOrderId,
-          handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
-            // Step 3: Verify signature
+        if (!data.data?.paymentSessionId) {
+          setError("Failed to initialize payment session. Please try again.");
+          return;
+        }
+
+        if (!window.Cashfree) {
+          setError("Payment gateway is initializing. Please wait a moment and try again.");
+          return;
+        }
+
+        // Step 2: Open Cashfree Drop-in Checkout modal
+        const cashfree = window.Cashfree({
+          mode: data.data.mode || "sandbox",
+        });
+
+        const result = await cashfree.checkout({
+          paymentSessionId: data.data.paymentSessionId,
+          redirectTarget: "_modal",
+        });
+
+        // Step 3: Handle modal checkout terminal states
+        if (result.error) {
+          // Modal dismissed or client error
+          setError("Payment was not completed. Your order is saved — you can try again.");
+          return;
+        }
+
+        if (result.redirect) {
+          // Redirection taking place
+          return;
+        }
+
+        // Re-verify on backend with retry polling (essential for QR code payments completed on mobile)
+        let isVerified = false;
+        const maxAttempts = 5;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
             const verifyRes = await fetch("/api/payments/verify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(response),
+              body: JSON.stringify({
+                orderId: data.data.orderId,
+                orderNumber: data.data.orderNumber,
+                cashfreeOrderId: data.data.cashfreeOrderId,
+              }),
             });
 
             const verifyData = await verifyRes.json();
-            if (verifyData.ok) {
-              await clearCart();
-              router.push(`/checkout/success?order=${data.data.orderNumber}`);
-            } else {
-              setError("Payment verification failed. If you were charged, contact support.");
-              router.push(`/checkout/failure?order=${data.data.orderNumber}`);
+            if (verifyData.ok && verifyData.data?.verified) {
+              isVerified = true;
+              break;
             }
-          },
-          prefill: {
-            name: form.fullName,
-            email: form.email,
-            contact: form.phone,
-          },
-          theme: {
-            color: "#2C313A",
-          },
-          modal: {
-            ondismiss: () => {
-              setError("Payment cancelled. Your order is saved — you can try again.");
-            },
-          },
-        };
+          } catch {
+            // Ignore temporary network errors during polling
+          }
 
-        const rzp = new window.Razorpay(options);
-        rzp.on("payment.failed", (response: Record<string, unknown>) => {
-          const desc = (response as { error?: { description?: string } }).error?.description;
-          setError(desc || "Payment failed. Please try again.");
-        });
-        rzp.open();
+          if (attempt < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+          }
+        }
+
+        if (isVerified) {
+          window.location.href = `/checkout/success?order=${data.data.orderNumber}`;
+        } else {
+          setError("Payment status is pending verification. If you were charged, your order will update shortly.");
+          window.location.href = `/checkout/failure?order=${data.data.orderNumber}`;
+        }
       } catch (err) {
         setError("Something went wrong. Please try again.");
-        console.error(err);
+        console.error("Checkout flow error:", err);
       }
     });
   };
 
   return (
     <>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+      <Script src="https://sdk.cashfree.com/js/v3/cashfree.js" strategy="lazyOnload" />
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_400px]">
         {/* Left: Address form */}
@@ -379,7 +407,7 @@ function CheckoutClient({ cart, savedAddresses = [], userEmail = "", userPhone =
           </button>
 
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Secure payment powered by Razorpay
+            Secure payment powered by Cashfree Payments
           </p>
         </div>
       </div>

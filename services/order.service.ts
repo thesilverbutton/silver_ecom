@@ -258,8 +258,8 @@ export async function cancelOrder(
 }
 
 /**
- * Initiate a refund via Razorpay.
- * Used by admin (Phase 7). Returns the refund result.
+ * Initiate a refund via Cashfree Payments.
+ * Used by admin. Returns the refund result.
  */
 export async function refundOrder(
   orderNumber: string,
@@ -267,32 +267,41 @@ export async function refundOrder(
 ): Promise<{ success: boolean; error?: string }> {
   await connectDB();
   const { Payment } = await import("@/models/payment.model");
-  const { getRazorpay } = await import("@/lib/razorpay");
+  const { getCashfree } = await import("@/lib/cashfree");
 
   const order = await Order.findOne({ orderNumber });
   if (!order) return { success: false, error: "Order not found" };
   if (order.paymentStatus !== "paid") return { success: false, error: "Order not paid" };
 
   const payment = await Payment.findOne({ orderId: order._id, status: "captured" });
-  if (!payment || !payment.razorpayPaymentId) {
+  if (!payment) {
     return { success: false, error: "No captured payment found" };
   }
 
-  const refundAmount = amount || order.grandTotal;
-  const razorpay = getRazorpay();
+  const targetOrderId = payment.cashfreeOrderId || orderNumber;
+  const refundAmountPaise = amount || order.grandTotal;
+  const refundAmountRupees = Number((refundAmountPaise / 100).toFixed(2));
+  const refundId = `rfnd_${Date.now()}`;
+
+  const cashfree = getCashfree();
 
   try {
-    const refund = await razorpay.payments.refund(payment.razorpayPaymentId, {
-      amount: refundAmount,
+    const refundResponse = await cashfree.PGOrderCreateRefund(targetOrderId, {
+      refund_id: refundId,
+      refund_amount: refundAmountRupees,
+      refund_note: `Refund for order ${orderNumber}`,
     });
 
+    const refundData = refundResponse.data;
+    const cfRefundId = refundData?.cf_refund_id ? String(refundData.cf_refund_id) : refundId;
+
     payment.refunds.push({
-      refundId: refund.id,
-      amount: refundAmount,
-      status: "processed",
+      refundId: cfRefundId,
+      amount: refundAmountPaise,
+      status: refundData?.refund_status || "processed",
       at: new Date(),
     });
-    payment.status = refundAmount >= payment.amount ? "refunded" : "partially_refunded";
+    payment.status = refundAmountPaise >= payment.amount ? "refunded" : "partially_refunded";
     await payment.save();
 
     order.paymentStatus = payment.status;
@@ -300,14 +309,14 @@ export async function refundOrder(
     order.timeline.push({
       at: new Date(),
       status: "refunded",
-      note: `Refund ₹${(refundAmount / 100).toFixed(0)} initiated`,
+      note: `Refund ₹${refundAmountRupees.toFixed(0)} initiated (${cfRefundId})`,
     });
     await order.save();
 
-    logger.info("Refund initiated", { orderNumber, refundId: refund.id, amount: refundAmount });
+    logger.info("Refund initiated", { orderNumber, refundId: cfRefundId, amountPaise: refundAmountPaise });
     return { success: true };
   } catch (err) {
     logger.error("Refund failed", { orderNumber, error: String(err) });
-    return { success: false, error: "Refund failed. Try again or contact Razorpay." };
+    return { success: false, error: "Refund failed. Please try again or check Cashfree dashboard." };
   }
 }

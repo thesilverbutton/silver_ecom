@@ -14,9 +14,9 @@ const serverSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().min(1, "CLOUDINARY_CLOUD_NAME is required"),
   CLOUDINARY_API_KEY: z.string().min(1, "CLOUDINARY_API_KEY is required"),
   CLOUDINARY_API_SECRET: z.string().min(1, "CLOUDINARY_API_SECRET is required"),
-  RAZORPAY_KEY_ID: z.string().optional().default(""),
-  RAZORPAY_KEY_SECRET: z.string().optional().default(""),
-  RAZORPAY_WEBHOOK_SECRET: z.string().optional().default(""),
+  CASHFREE_APP_ID: z.string().optional().default(""),
+  CASHFREE_SECRET_KEY: z.string().optional().default(""),
+  CASHFREE_ENV: z.string().optional().default(""),
   RESEND_API_KEY: z.string().optional().default(""),
   EMAIL_FROM: z.string().optional().default("The Silver Button <enquiry@silverbutton.in>"),
   SHIPROCKET_EMAIL: z.string().optional().default(""),
@@ -32,7 +32,8 @@ const serverSchema = z.object({
 const clientSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().optional().default(""),
-  NEXT_PUBLIC_RAZORPAY_KEY_ID: z.string().optional().default(""),
+  NEXT_PUBLIC_CASHFREE_ENV: z.string().optional().default(""),
+
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;

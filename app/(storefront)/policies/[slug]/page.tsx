@@ -46,7 +46,7 @@ Custom-made or sale items are not eligible for returns.`,
 
 INFORMATION WE COLLECT
 • We only collect essential information required to process your orders and provide a seamless shopping experience. This includes your name, email address, phone number, and shipping address.
-• We do not collect or store your payment card details. All transactions are securely processed through our payment partner, Razorpay, using industry-standard encryption.
+• We do not collect or store your payment card details. All transactions are securely processed through our payment partner, Cashfree Payments, using industry-standard encryption.
 
 HOW WE USE YOUR DATA
 • To process and fulfill your orders, including sending order confirmations and shipping updates.

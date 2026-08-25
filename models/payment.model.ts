@@ -15,10 +15,12 @@ export interface IWebhookEvent {
 
 export interface IPayment extends Document {
   orderId: mongoose.Types.ObjectId;
-  provider: "razorpay";
-  razorpayOrderId: string;
-  razorpayPaymentId?: string;
-  razorpaySignature?: string;
+  provider: "cashfree";
+  cashfreeOrderId?: string;
+  cfOrderId?: string;
+  cfPaymentId?: string;
+  paymentSessionId?: string;
+
   amount: number;
   currency: string;
   status: "created" | "authorized" | "captured" | "failed" | "refunded" | "partially_refunded";
@@ -53,10 +55,11 @@ const WebhookEventSchema = new Schema<IWebhookEvent>(
 const PaymentSchema = new Schema<IPayment>(
   {
     orderId: { type: Schema.Types.ObjectId, ref: "Order", required: true },
-    provider: { type: String, default: "razorpay", enum: ["razorpay"] },
-    razorpayOrderId: { type: String, required: true },
-    razorpayPaymentId: { type: String },
-    razorpaySignature: { type: String },
+    provider: { type: String, default: "cashfree", enum: ["cashfree"] },
+    cashfreeOrderId: { type: String },
+    cfOrderId: { type: String },
+    cfPaymentId: { type: String },
+    paymentSessionId: { type: String },
     amount: { type: Number, required: true },
     currency: { type: String, default: "INR" },
     status: {
@@ -73,9 +76,10 @@ const PaymentSchema = new Schema<IPayment>(
   { timestamps: true },
 );
 
-PaymentSchema.index({ razorpayOrderId: 1 }, { unique: true });
+PaymentSchema.index({ cashfreeOrderId: 1 }, { sparse: true });
+PaymentSchema.index({ cfOrderId: 1 }, { sparse: true });
+PaymentSchema.index({ cfPaymentId: 1 }, { sparse: true });
 PaymentSchema.index({ orderId: 1 });
-PaymentSchema.index({ razorpayPaymentId: 1 }, { sparse: true });
 PaymentSchema.index({ status: 1 });
 
 export const Payment: Model<IPayment> =

@@ -86,7 +86,7 @@ export function errorToResponse(error: unknown, traceId?: string) {
     ok: false as const,
     error: {
       code: "INTERNAL",
-      message: "An unexpected error occurred",
+      message: error instanceof AppError ? error.message : "An unexpected error occurred",
       traceId,
     },
   };
