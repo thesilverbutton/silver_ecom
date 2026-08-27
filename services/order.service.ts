@@ -93,7 +93,9 @@ export async function finalizeOrder(orderId: string, traceId?: string) {
 
   const order = await Order.findById(orderId);
   if (!order) throw new Error("Order not found");
-  if (order.status === "paid") return { success: true, oversold: [] }; // idempotent
+  if (order.paymentStatus === "paid") {
+    return { success: true, oversold: [], newlyFinalized: false };
+  }
 
   const oversold: string[] = [];
 
@@ -127,7 +129,7 @@ export async function finalizeOrder(orderId: string, traceId?: string) {
   // Update order status
   order.status = "paid";
   order.paymentStatus = "paid";
-  order.timeline.push({ at: new Date(), status: "paid", note: "Payment confirmed via webhook" });
+  order.timeline.push({ at: new Date(), status: "paid", note: "Payment received and confirmed." });
 
   if (oversold.length > 0) {
     order.notes = `needs_review:oversold - ${oversold.join(", ")}`;
@@ -137,7 +139,7 @@ export async function finalizeOrder(orderId: string, traceId?: string) {
   await order.save();
   logger.info("Order finalized", { orderId, orderNumber: order.orderNumber, oversold }, traceId);
 
-  return { success: true, oversold };
+  return { success: true, oversold, newlyFinalized: true };
 }
 
 // ─── Customer-facing queries ────────────────────────────────────────────────

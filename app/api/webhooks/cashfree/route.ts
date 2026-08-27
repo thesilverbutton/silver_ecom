@@ -1,7 +1,9 @@
-import { NextRequest } from "next/server";
-import { verifyWebhookSignature, handleWebhookCashfreeEvent } from "@/services/payment.service";
-import { finalizeOrder } from "@/services/order.service";
-import { sendOrderConfirmation } from "@/services/email.service";
+import { after, NextRequest } from "next/server";
+import {
+  verifyWebhookSignature,
+  handleWebhookCashfreeEvent,
+  verifyCashfreePayment,
+} from "@/services/payment.service";
 import { connectDB } from "@/lib/db";
 import { Payment } from "@/models/payment.model";
 import { Order } from "@/models/order.model";
@@ -60,30 +62,17 @@ export async function POST(request: NextRequest) {
         return Response.json({ ok: true }); // Return 200 to prevent retries for non-existent records
       }
 
-      // Idempotency check: if order already paid, skip finalization
-      const order = await Order.findById(payment.orderId);
-      if (order && order.status === "paid") {
-        logger.info("Cashfree webhook: order already finalized, skipping", { orderId: String(order._id) }, traceId);
-        return Response.json({ ok: true });
-      }
-
-      // Atomically finalize order (decrement stock, mark paid)
-      if (order) {
-        await finalizeOrder(String(order._id), traceId);
-
-        // Send confirmation email asynchronously
-        sendOrderConfirmation({
-          email: order.email,
-          orderNumber: order.orderNumber,
-          items: order.items.map((i) => ({ title: i.title, quantity: i.quantity, lineTotal: i.lineTotal })),
-          grandTotal: order.grandTotal,
-          shippingAddress: order.shippingAddress,
-        }).catch((err) => {
-          logger.warn("Order confirmation email failed to send", { orderNumber: order.orderNumber, error: String(err) });
-        });
-
-        logger.info("Order finalized via Cashfree webhook", { orderNumber: order.orderNumber, cashfreeOrderId }, traceId);
-      }
+      after(async () => {
+        const verification = await verifyCashfreePayment(cashfreeOrderId);
+        if (!verification.verified) {
+          logger.error("Cashfree webhook payment could not be re-verified", {
+            cashfreeOrderId,
+            status: verification.status,
+          }, traceId);
+          return;
+        }
+        logger.info("Order verified and processed via Cashfree webhook", { cashfreeOrderId }, traceId);
+      });
     } else if (eventType === "PAYMENT_FAILED_WEBHOOK" || eventType === "PAYMENT_USER_DROPPED_WEBHOOK") {
       const cashfreeOrderId = eventData?.order?.order_id as string;
       const cfPaymentId = eventData?.payment?.cf_payment_id ? String(eventData.payment.cf_payment_id) : undefined;

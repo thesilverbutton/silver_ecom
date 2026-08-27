@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       orderNumber: parsed.data.orderNumber,
       email: parsed.data.email.toLowerCase(),
     })
-      .select("orderNumber status paymentStatus fulfillmentStatus grandTotal items shippingAddress createdAt timeline courierName awbCode")
+      .select("orderNumber status paymentStatus fulfillmentStatus grandTotal items shippingAddress createdAt timeline courierName awbCode trackingUrl")
       .lean();
 
     if (!order) {

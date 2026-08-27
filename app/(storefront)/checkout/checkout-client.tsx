@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useState, useTransition } from "react";
 import Script from "next/script";
 import Image from "next/image";
 import { formatINR } from "@/lib/utils";
-import { clearCart } from "@/actions/cart";
 import type { ResolvedCart } from "@/services/cart.service";
 
 interface SavedAddress {
@@ -43,8 +41,10 @@ declare global {
   }
 }
 
+type CashfreeClient = ReturnType<NonNullable<Window["Cashfree"]>>;
+
 function CheckoutClient({ cart, savedAddresses = [], userEmail = "", userPhone = "" }: CheckoutClientProps) {
-  const router = useRouter();
+  const cashfreeRef = useRef<CashfreeClient | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
   const [selectedAddressId, setSelectedAddressId] = useState<string | "new">(
@@ -71,6 +71,13 @@ function CheckoutClient({ cart, savedAddresses = [], userEmail = "", userPhone =
 
   const isFormValid =
     form.email && form.phone.length >= 10 && form.fullName && form.line1 && form.city && form.state && form.pincode.length >= 6;
+
+  const initializeCashfree = () => {
+    if (!window.Cashfree || cashfreeRef.current) return;
+
+    const mode = process.env.NEXT_PUBLIC_CASHFREE_ENV === "production" ? "production" : "sandbox";
+    cashfreeRef.current = window.Cashfree({ mode });
+  };
 
   const handlePlaceOrder = () => {
     if (!isFormValid) {
@@ -112,17 +119,13 @@ function CheckoutClient({ cart, savedAddresses = [], userEmail = "", userPhone =
           return;
         }
 
-        if (!window.Cashfree) {
+        if (!cashfreeRef.current) {
           setError("Payment gateway is initializing. Please wait a moment and try again.");
           return;
         }
 
         // Step 2: Open Cashfree Drop-in Checkout modal
-        const cashfree = window.Cashfree({
-          mode: data.data.mode || "sandbox",
-        });
-
-        const result = await cashfree.checkout({
+        const result = await cashfreeRef.current.checkout({
           paymentSessionId: data.data.paymentSessionId,
           redirectTarget: "_modal",
         });
@@ -184,7 +187,11 @@ function CheckoutClient({ cart, savedAddresses = [], userEmail = "", userPhone =
 
   return (
     <>
-      <Script src="https://sdk.cashfree.com/js/v3/cashfree.js" strategy="lazyOnload" />
+      <Script
+        src="https://sdk.cashfree.com/js/v3/cashfree.js"
+        strategy="lazyOnload"
+        onReady={initializeCashfree}
+      />
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_400px]">
         {/* Left: Address form */}

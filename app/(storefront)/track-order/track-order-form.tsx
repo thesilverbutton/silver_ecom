@@ -15,13 +15,14 @@ interface OrderData {
   timeline: Array<{ at: string; status: string; note?: string }>;
   courierName?: string;
   awbCode?: string;
+  trackingUrl?: string;
 }
 
 const statusConfig: Record<string, { icon: typeof Package; color: string; label: string }> = {
-  pending: { icon: Clock, color: "text-yellow-500", label: "Pending" },
-  paid: { icon: CheckCircle, color: "text-green-500", label: "Paid" },
-  processing: { icon: Package, color: "text-blue-500", label: "Processing" },
-  shipped: { icon: Truck, color: "text-indigo-500", label: "Shipped" },
+  pending: { icon: Clock, color: "text-yellow-600", label: "Awaiting payment" },
+  paid: { icon: CheckCircle, color: "text-green-600", label: "Payment received" },
+  processing: { icon: Package, color: "text-blue-600", label: "Preparing your order" },
+  shipped: { icon: Truck, color: "text-indigo-600", label: "On the way" },
   delivered: { icon: CheckCircle, color: "text-green-600", label: "Delivered" },
   cancelled: { icon: XCircle, color: "text-red-500", label: "Cancelled" },
   refunded: { icon: XCircle, color: "text-orange-500", label: "Refunded" },
@@ -61,6 +62,24 @@ export function TrackOrderForm() {
   };
 
   const config = order ? statusConfig[order.status] || statusConfig.pending : null;
+  const paymentLabel = order?.paymentStatus === "paid"
+    ? "Paid"
+    : order?.paymentStatus === "failed"
+      ? "Payment failed"
+      : order?.paymentStatus === "refunded"
+        ? "Refunded"
+        : order?.paymentStatus === "partially_refunded"
+          ? "Partially refunded"
+          : "Awaiting payment";
+  const deliveryLabel = order?.fulfillmentStatus === "delivered"
+    ? "Delivered"
+    : order?.fulfillmentStatus === "shipped"
+      ? "In transit"
+      : order?.fulfillmentStatus === "processing"
+        ? "Preparing for dispatch"
+        : order?.fulfillmentStatus === "cancelled"
+          ? "Shipment cancelled"
+          : "Not started";
 
   return (
     <div>
@@ -113,11 +132,32 @@ export function TrackOrderForm() {
             </p>
           </div>
 
+          <div className="grid gap-3 border-y py-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs font-medium uppercase text-muted-foreground">Payment</p>
+              <p className="mt-1 text-sm font-semibold">{paymentLabel}</p>
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase text-muted-foreground">Delivery</p>
+              <p className="mt-1 text-sm font-semibold">{deliveryLabel}</p>
+            </div>
+          </div>
+
           {/* Shipping Info */}
           {order.courierName && (
             <div className="rounded-md bg-muted/50 px-4 py-3 text-sm">
               <p><span className="font-medium">Courier:</span> {order.courierName}</p>
               {order.awbCode && <p><span className="font-medium">Tracking ID:</span> {order.awbCode}</p>}
+              {order.trackingUrl && (
+                <a
+                  href={order.trackingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block font-medium text-primary hover:underline"
+                >
+                  Track with courier
+                </a>
+              )}
             </div>
           )}
 
@@ -147,7 +187,7 @@ export function TrackOrderForm() {
                   <div key={i} className="flex items-start gap-3 text-sm">
                     <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
                     <div>
-                      <p className="font-medium capitalize">{entry.status}</p>
+                      <p className="font-medium capitalize">{entry.status.replace(/_/g, " ")}</p>
                       {entry.note && <p className="text-muted-foreground">{entry.note}</p>}
                       <p className="text-xs text-muted-foreground">
                         {new Date(entry.at).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}

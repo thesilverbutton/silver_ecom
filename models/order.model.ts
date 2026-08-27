@@ -51,6 +51,7 @@ export interface IOrder extends Document {
   fulfillmentStatus: "unfulfilled" | "processing" | "shipped" | "delivered" | "cancelled";
   paymentId?: mongoose.Types.ObjectId;
   shiprocketOrderId?: string;
+  shiprocketShipmentId?: string;
   awbCode?: string;
   courierName?: string;
   trackingUrl?: string;
@@ -135,6 +136,7 @@ const OrderSchema = new Schema<IOrder>(
     },
     paymentId: { type: Schema.Types.ObjectId, ref: "Payment" },
     shiprocketOrderId: { type: String },
+    shiprocketShipmentId: { type: String },
     awbCode: { type: String },
     courierName: { type: String },
     trackingUrl: { type: String },

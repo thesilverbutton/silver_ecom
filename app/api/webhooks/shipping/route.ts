@@ -3,7 +3,7 @@ import { handleShiprocketWebhook } from "@/services/shipping.service";
 import { generateTraceId, logger } from "@/lib/logger";
 
 /**
- * POST /api/webhooks/shiprocket
+ * POST /api/webhooks/shipping
  * Receives status updates from Shiprocket and syncs order fulfillment status.
  */
 export async function POST(request: NextRequest) {

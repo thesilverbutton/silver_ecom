@@ -13,6 +13,10 @@ export function getCashfreeMode(): "sandbox" | "production" {
 
   // Check if secret key starts with cfsk_ma_prod_
   const secretKey = process.env.CASHFREE_SECRET_KEY || "";
+  const appId = process.env.CASHFREE_APP_ID || "";
+  if (secretKey.startsWith("cfsk_ma_test_") || appId.startsWith("TEST")) {
+    return "sandbox";
+  }
   if (secretKey.startsWith("cfsk_ma_prod_")) {
     return "production";
   }

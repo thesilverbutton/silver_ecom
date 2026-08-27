@@ -218,6 +218,7 @@ export interface Order {
   fulfillmentStatus: "unfulfilled" | "processing" | "shipped" | "delivered" | "cancelled";
   paymentId?: string;
   shiprocketOrderId?: string;
+  shiprocketShipmentId?: string;
   awbCode?: string;
   courierName?: string;
   trackingUrl?: string;

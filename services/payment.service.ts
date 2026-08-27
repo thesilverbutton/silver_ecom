@@ -1,11 +1,10 @@
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import { Payment } from "@/models/payment.model";
 import { Order } from "@/models/order.model";
 import { getCashfree, getCashfreeMode } from "@/lib/cashfree";
-import { finalizeOrder } from "@/services/order.service";
-import { sendOrderConfirmation } from "@/services/email.service";
+import { processPaidOrder } from "@/services/paid-order.service";
 import { logger } from "@/lib/logger";
 import { PaymentError } from "@/lib/errors";
 
@@ -191,26 +190,11 @@ export async function verifyCashfreePayment(orderIdOrNumber: string) {
       payment.status = "captured";
       await payment.save();
 
-      // Finalize order atomically and send confirmation email if not yet finalized
+      // Either verification or the webhook may arrive first; both use the same idempotent routine.
       try {
-        const order = await Order.findById(payment.orderId);
-        if (order && order.status !== "paid") {
-          await finalizeOrder(String(order._id));
-
-          sendOrderConfirmation({
-            email: order.email,
-            orderNumber: order.orderNumber,
-            items: order.items.map((i) => ({ title: i.title, quantity: i.quantity, lineTotal: i.lineTotal })),
-            grandTotal: order.grandTotal,
-            shippingAddress: order.shippingAddress,
-          }).catch((err) => {
-            logger.warn("Order confirmation email failed to send", { orderNumber: order.orderNumber, error: String(err) });
-          });
-
-          logger.info("Order finalized upon server verification", { orderNumber: order.orderNumber, lookupOrderId });
-        }
+        await processPaidOrder(String(payment.orderId));
       } catch (finalizeErr) {
-        logger.error("Error finalizing order upon payment verification", { lookupOrderId, error: String(finalizeErr) });
+        logger.error("Error processing paid order upon payment verification", { lookupOrderId, error: String(finalizeErr) });
       }
     }
 
@@ -238,19 +222,16 @@ export async function verifyCashfreePayment(orderIdOrNumber: string) {
 export function verifyWebhookSignature(rawBody: string, signature: string, timestamp: string = ""): boolean {
   const secret = process.env.CASHFREE_SECRET_KEY;
 
-  if (!secret) {
-    logger.warn("Webhook secret not set, skipping webhook signature check");
-    return true; // In development without secret, allow through
+  if (!secret || !signature || !timestamp) {
+    logger.warn("Cashfree webhook signature headers or secret are missing");
+    return false;
   }
 
-  // Cashfree signature verification: HMAC-SHA256(timestamp + rawBody, secret) -> base64
-  const payloadToSign = timestamp ? timestamp + rawBody : rawBody;
-  const base64Sig = createHmac("sha256", secret).update(payloadToSign).digest("base64");
-  if (base64Sig === signature) return true;
-
-  // Hex fallback for legacy webhooks
-  const hexSig = createHmac("sha256", secret).update(rawBody).digest("hex");
-  return hexSig === signature;
+  const expected = Buffer.from(
+    createHmac("sha256", secret).update(timestamp + rawBody).digest("base64"),
+  );
+  const received = Buffer.from(signature);
+  return expected.length === received.length && timingSafeEqual(expected, received);
 }
 
 /**
