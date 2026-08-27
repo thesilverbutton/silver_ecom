@@ -3,7 +3,7 @@ import { connectDB } from "@/lib/db";
 import { ContactQuery } from "@/models/contact-query.model";
 
 type ContactQueryLean = {
-  _id: any;
+  _id: unknown;
   name: string;
   email: string;
   subject?: string;

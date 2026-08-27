@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
+import { auth } from "@/lib/auth";
 import { verifyCashfreePayment } from "@/services/payment.service";
 import { generateTraceId, logger } from "@/lib/logger";
 
@@ -18,6 +19,14 @@ export async function POST(request: NextRequest) {
   const traceId = generateTraceId();
 
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return Response.json(
+        { ok: false, error: { code: "UNAUTHENTICATED", message: "Please log in to verify payment", traceId } },
+        { status: 401 },
+      );
+    }
+
     const body = await request.json();
     const parsed = verifySchema.safeParse(body);
 

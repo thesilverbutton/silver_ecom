@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connectDB } from "@/lib/db";
 import { Customer } from "@/models/customer.model";
 import { CustomerFilters } from "./components/customer-filters";
+import { CustomerActions } from "./components/customer-actions";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -19,10 +20,11 @@ export default async function AdminCustomersPage({ searchParams }: PageProps) {
   if (params.status === "active") query.isBlocked = false;
   if (params.status === "blocked") query.isBlocked = true;
   if (params.search) {
+    const escaped = params.search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     query.$or = [
-      { name: { $regex: params.search, $options: "i" } },
-      { email: { $regex: params.search, $options: "i" } },
-      { phone: { $regex: params.search, $options: "i" } },
+      { name: { $regex: escaped, $options: "i" } },
+      { email: { $regex: escaped, $options: "i" } },
+      { phone: { $regex: escaped, $options: "i" } },
     ];
   }
 
@@ -55,6 +57,7 @@ export default async function AdminCustomersPage({ searchParams }: PageProps) {
               <th className="px-4 py-3 text-left font-medium">Phone</th>
               <th className="px-4 py-3 text-left font-medium">Status</th>
               <th className="px-4 py-3 text-right font-medium">Joined</th>
+              <th className="px-4 py-3 text-center font-medium">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -70,6 +73,9 @@ export default async function AdminCustomersPage({ searchParams }: PageProps) {
                 </td>
                 <td className="px-4 py-3 text-right text-muted-foreground">
                   {new Date(c.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <CustomerActions id={String(c._id)} isBlocked={c.isBlocked} name={c.name} />
                 </td>
               </tr>
             ))}

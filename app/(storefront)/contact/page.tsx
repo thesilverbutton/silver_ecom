@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { Container, Section } from "@/components/layout/section";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { ContactForm } from "./components/contact-form";

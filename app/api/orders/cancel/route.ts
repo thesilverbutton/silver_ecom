@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     // cancelOrder checks ownership via customerId; for now use email-based matching
-    const result = await cancelOrder(parsed.data.orderNumber, parsed.data.reason);
+    const result = await cancelOrder(parsed.data.orderNumber, parsed.data.reason, session.user.id);
 
     if (!result.success) {
       return Response.json({ ok: false, error: { message: result.error } }, { status: 400 });

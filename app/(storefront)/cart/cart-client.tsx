@@ -22,12 +22,6 @@ function CartPageClient({ initialCart }: CartPageClientProps) {
   const [cart, setCart] = useState(initialCart);
   const [isPending, startTransition] = useTransition();
 
-  const refresh = () => {
-    startTransition(async () => {
-      const updated = await getCart();
-      setCart(updated);
-    });
-  };
 
   const handleQuantityChange = (productId: string, newQty: number, variantId?: string) => {
     startTransition(async () => {

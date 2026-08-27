@@ -6,7 +6,6 @@ import { Heart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { PriceTag } from "@/components/ui/price-tag";
-import { cn } from "@/lib/utils";
 
 interface WishlistProduct {
   slug: string;
@@ -22,29 +21,31 @@ export default function WishlistPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (items.length === 0) {
-      setProducts([]);
-      setLoading(false);
-      return;
-    }
+    if (items.length === 0) return;
+
+    let active = true;
 
     // Fetch product details for wishlisted slugs via search API
     async function fetchProducts() {
       setLoading(true);
       try {
         const res = await fetch(`/api/wishlist-products?slugs=${items.join(",")}`);
-        if (res.ok) {
+        if (res.ok && active) {
           const data = await res.json();
           setProducts(data.products || []);
         }
       } catch {
         // Silently fail — worst case they see empty list
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
 
     fetchProducts();
+
+    return () => {
+      active = false;
+    };
   }, [items]);
 
   return (

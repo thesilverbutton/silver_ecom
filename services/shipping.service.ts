@@ -134,6 +134,8 @@ export async function generateAWB(orderNumber: string) {
     }
 
     const data = (await res.json()) as {
+      message?: string;
+      status_code?: number;
       response: { data: { awb_code: string; courier_name: string } };
     };
 
@@ -141,7 +143,9 @@ export async function generateAWB(orderNumber: string) {
     const courierName = data.response?.data?.courier_name;
 
     if (!awbCode) {
-      throw new Error("Shiprocket did not return an AWB code");
+      throw new Error(
+        data.message || `Shiprocket did not return an AWB code${data.status_code ? ` (${data.status_code})` : ""}`,
+      );
     }
 
     order.awbCode = awbCode;

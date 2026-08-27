@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { handleShiprocketWebhook } from "@/services/shipping.service";
 import { generateTraceId, logger } from "@/lib/logger";
 
@@ -10,10 +11,21 @@ export async function POST(request: NextRequest) {
   const traceId = generateTraceId();
 
   try {
-    const signature = request.headers.get("x-api-key");
+    const signature = request.headers.get("x-api-key") || "";
     const secret = process.env.SHIPROCKET_WEBHOOK_SECRET;
 
-    if (!secret || signature !== secret) {
+    if (!secret || !signature) {
+      logger.error("Shiprocket webhook: missing secret or signature", { traceId });
+      return Response.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
+    }
+
+    try {
+      const sigBuf = Buffer.from(signature);
+      const secBuf = Buffer.from(secret);
+      if (sigBuf.length !== secBuf.length || !timingSafeEqual(sigBuf, secBuf)) {
+        throw new Error("mismatch");
+      }
+    } catch {
       logger.error("Shiprocket webhook signature invalid", { traceId });
       return Response.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
     }

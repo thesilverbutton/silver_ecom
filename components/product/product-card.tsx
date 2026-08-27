@@ -32,7 +32,6 @@ function ProductCard({
   isOutOfStock = false,
   isBestSeller = false,
   isNewArrival = false,
-  fabric,
   className,
 }: ProductCardProps) {
   const [imgError, setImgError] = useState(false);

@@ -27,6 +27,15 @@ export default async function OrdersPage() {
     cancelled: "bg-red-100 text-red-800",
     refunded: "bg-gray-100 text-gray-800",
   };
+  const statusLabels: Record<string, string> = {
+    pending: "Awaiting payment",
+    paid: "Payment received",
+    processing: "Preparing for shipment",
+    shipped: "Shipped",
+    delivered: "Delivered",
+    cancelled: "Cancelled",
+    refunded: "Refunded",
+  };
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -61,7 +70,7 @@ export default async function OrdersPage() {
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-semibold">{order.orderNumber}</p>
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${statusColors[order.status] || "bg-gray-100 text-gray-800"}`}>
-                    {order.status}
+                    {statusLabels[order.status] || order.status}
                   </span>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">

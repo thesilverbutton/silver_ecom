@@ -43,6 +43,15 @@ export default async function OrderDetailPage({ params }: PageProps) {
     cancelled: "bg-red-100 text-red-800",
     refunded: "bg-gray-100 text-gray-800",
   };
+  const statusLabels: Record<string, string> = {
+    pending: "Awaiting payment",
+    paid: "Payment received",
+    processing: "Preparing for shipment",
+    shipped: "Shipped",
+    delivered: "Delivered",
+    cancelled: "Cancelled",
+    refunded: "Refunded",
+  };
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -58,7 +67,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
           </p>
         </div>
         <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase ${statusColors[order.status] || "bg-gray-100"}`}>
-          {order.status}
+          {statusLabels[order.status] || order.status}
         </span>
       </div>
 

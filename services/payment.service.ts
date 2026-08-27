@@ -309,7 +309,9 @@ export async function handleWebhookCashfreeEvent(
     eventType === "PAYMENT_USER_DROPPED_WEBHOOK" ||
     eventType === "payment.failed"
   ) {
-    payment.status = "failed";
+    if (payment.status !== "captured") {
+      payment.status = "failed";
+    }
   }
 
   await payment.save();

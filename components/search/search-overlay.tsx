@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, X, Clock, ArrowRight, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { formatINR } from "@/lib/utils";
 
 interface SearchResult {

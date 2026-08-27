@@ -84,7 +84,16 @@ export async function POST(request: NextRequest) {
           $or: [{ cashfreeOrderId }, { cfOrderId: cashfreeOrderId }],
         });
 
-        if (payment) {
+        if (payment && payment.status !== "captured") {
+          const order = await Order.findById(payment.orderId).select("paymentStatus");
+          if (order?.paymentStatus === "paid") {
+            logger.info("Ignoring failed payment attempt after order was paid", {
+              cashfreeOrderId,
+              eventType,
+            }, traceId);
+            return Response.json({ ok: true });
+          }
+
           await Order.updateOne(
             { _id: payment.orderId },
             {

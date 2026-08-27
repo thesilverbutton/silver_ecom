@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { UserPlus } from "lucide-react";
 
@@ -12,7 +11,6 @@ interface CreateAccountPromptProps {
 }
 
 export function CreateAccountPrompt({ email, name, phone }: CreateAccountPromptProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
