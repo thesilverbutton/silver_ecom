@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getFeaturedProducts, getBestSellers } from "@/services/product.service";
 import { getCategoriesForGender } from "@/services/category.service";
 import { ProductCard } from "@/components/product/product-card";
+import { DraggableHeroImage } from "@/components/home/draggable-hero-image";
 import { ArrowRight } from "lucide-react";
 
 const PLACEHOLDER = "https://placehold.co/400x533/e5e7eb/4b5563?text=Product";
@@ -41,36 +42,27 @@ export default async function HomePage() {
       */}
       <section className="bg-[#F6F3ED]">
         <div className="mx-auto max-w-[1280px] px-5 pt-10 pb-6 text-center md:px-16 md:pt-14 md:pb-8">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A7A66] sm:text-[11px] sm:tracking-[0.28em]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#635341] sm:text-[11px] sm:tracking-[0.28em]">
             Handloom · Heritage · Craft
           </p>
           <h1 className="mx-auto mt-3 max-w-[15ch] font-[family-name:var(--font-serif)] text-[clamp(1.6rem,8vw,3.5rem)] font-bold uppercase leading-[1.15] tracking-[0.08em] text-[#3C332A] md:max-w-none md:tracking-[0.18em]">
             The Silver Button
           </h1>
-          <p className="mx-auto mt-4 max-w-[34ch] text-[13px] leading-relaxed text-[#6B5D4D] sm:text-sm md:max-w-xl md:text-base">
+          <p className="mx-auto mt-4 max-w-[34ch] text-[13px] leading-relaxed text-[#4F4232] sm:text-sm md:max-w-xl md:text-base">
             Every piece passes through six pairs of hands before it
             reaches yours.
           </p>
         </div>
 
-        <Image
-          src="/hero_image.png"
-          alt="The craft journey: farming, fibre preparation, hand weaving, handcrafting, silver craftsmanship and the finished garment"
-          width={1774}
-          height={887}
-          priority
-          quality={90}
-          sizes="100vw"
-          className="h-auto w-full"
-        />
+        <DraggableHeroImage />
 
         <ol className="mx-auto grid max-w-md grid-cols-2 gap-x-4 gap-y-3 px-5 pt-6 sm:max-w-2xl sm:grid-cols-3 md:hidden">
           {CRAFT_STEPS.map((step, i) => (
             <li key={step} className="flex items-baseline gap-2">
-              <span className="text-[10px] font-semibold tabular-nums text-[#B0A18C]">
+              <span className="text-[10px] font-semibold tabular-nums text-[#736350]">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <span className="text-[11px] font-medium uppercase leading-tight tracking-[0.06em] text-[#6B5D4D]">
+              <span className="text-[11px] font-medium uppercase leading-tight tracking-[0.06em] text-[#4F4232]">
                 {step}
               </span>
             </li>
@@ -172,7 +164,8 @@ export default async function HomePage() {
               src="/hero_images/about_m1_u-min.webp"
               alt="Artisan weaving on a handloom"
               fill
-              sizes="(max-width: 768px) 100vw, 50vw"
+              quality={70}
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 500px"
               className="object-cover"
             />
           </div>

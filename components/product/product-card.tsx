@@ -59,6 +59,7 @@ function ProductCard({
             src={image.url}
             alt={image.alt}
             fill
+            quality={70}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             onError={() => setImgError(true)}
             className={cn(
@@ -74,6 +75,7 @@ function ProductCard({
             src={secondImage.url}
             alt={secondImage.alt}
             fill
+            quality={70}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             onError={() => setSecondImgError(true)}
             className="object-cover opacity-0 transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:opacity-100"

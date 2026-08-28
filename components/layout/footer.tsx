@@ -28,9 +28,9 @@ function Footer({ navItems }: FooterProps) {
 
         {/* Men Column */}
         <div className="col-span-1">
-          <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-foreground">
+          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-foreground">
             Men
-          </h4>
+          </h3>
           <div className="flex flex-col gap-3 text-sm text-muted-foreground">
             {menLinks.map((link) => (
               <Link
@@ -46,9 +46,9 @@ function Footer({ navItems }: FooterProps) {
 
         {/* Women Column */}
         <div className="col-span-1">
-          <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-foreground">
+          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-foreground">
             Women
-          </h4>
+          </h3>
           <div className="flex flex-col gap-3 text-sm text-muted-foreground">
             {womenLinks.map((link) => (
               <Link
@@ -64,9 +64,9 @@ function Footer({ navItems }: FooterProps) {
 
         {/* Company & Support Column */}
         <div className="col-span-1">
-          <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-foreground">
+          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-foreground">
             Company
-          </h4>
+          </h3>
           <div className="flex flex-col gap-3 text-sm text-muted-foreground">
             <Link href="/about" className="inline-block w-fit transition-all duration-200 hover:translate-x-1 hover:text-foreground">
               Our Story
