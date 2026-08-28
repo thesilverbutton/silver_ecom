@@ -6,6 +6,7 @@ import { Heart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { PriceTag } from "@/components/ui/price-tag";
+import { cloudinaryLoader, getOptimizedCloudinaryUrl, isCloudinaryUrl } from "@/lib/cloudinary-utils";
 
 interface WishlistProduct {
   slug: string;
@@ -97,7 +98,8 @@ export default function WishlistPage() {
               >
                 {product.image ? (
                   <Image
-                    src={product.image.url}
+                    src={getOptimizedCloudinaryUrl(product.image.url)}
+                    loader={isCloudinaryUrl(product.image.url) ? cloudinaryLoader : undefined}
                     alt={product.image.alt}
                     fill
                     sizes="(max-width: 640px) 50vw, 33vw"

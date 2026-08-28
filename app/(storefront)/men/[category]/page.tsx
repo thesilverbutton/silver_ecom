@@ -1,13 +1,24 @@
 import type { Metadata } from "next";
 import { getProducts } from "@/services/product.service";
-import { getCategoryBySlug } from "@/services/category.service";
+import { getCategoryBySlug, getCategoriesForGender } from "@/services/category.service";
 import { Container } from "@/components/layout/section";
 import { ProductCard } from "@/components/product/product-card";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { CategoryEmpty } from "@/components/layout/category-empty";
 
+export const revalidate = 60;
+
 interface PageProps {
   params: Promise<{ category: string }>;
+}
+
+export async function generateStaticParams() {
+  try {
+    const cats = await getCategoriesForGender("men");
+    return cats.map((c) => ({ category: c.slug.replace("men-", "") }));
+  } catch {
+    return [];
+  }
 }
 
 /** Turn a slug like "silver-button-shirts" into "Silver Button Shirts" */

@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description: "Shop handloom fashion for men — shirts, kurtas, trousers, jackets, and accessories.",
 };
 
+export const revalidate = 60;
+
 export default async function MenPage() {
   const [result, categories] = await Promise.all([
     getProducts({ gender: "men" }, { limit: 12, sort: "newest" }),

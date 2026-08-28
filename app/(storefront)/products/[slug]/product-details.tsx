@@ -11,8 +11,11 @@ import { VariantSelector, type VariantOption } from "@/components/product/varian
 import { SilverButtonCallout } from "@/components/product/silver-button-callout";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { addToCart } from "@/actions/cart";
+import { cloudinaryLoader, getOptimizedCloudinaryUrl, isCloudinaryUrl } from "@/lib/cloudinary-utils";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Separator } from "@/components/ui/separator";
+import { notifyCartUpdated } from "@/hooks/use-cart-count";
+import { useProductInCart } from "@/hooks/use-product-in-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
 
 interface ProductImage {
@@ -76,7 +79,7 @@ function ProductDetails({
 }: ProductDetailsProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isPending, startTransition] = useTransition();
-  const [added, setAdded] = useState(isInCart);
+  const [added, setAdded] = useProductInCart(String(product._id), isInCart);
 
   // Track selected options as a map (e.g., { size: "M", artForm: "Type 1" })
   const optionKeys = product.hasVariants
@@ -138,9 +141,11 @@ function ProductDetails({
         <div className="relative w-full overflow-hidden rounded-lg bg-muted" style={{ paddingBottom: "133.33%" }}>
           {product.images[selectedImage] && (
             <Image
-              src={product.images[selectedImage].url}
+              src={getOptimizedCloudinaryUrl(product.images[selectedImage].url)}
+              loader={isCloudinaryUrl(product.images[selectedImage].url) ? cloudinaryLoader : undefined}
               alt={product.images[selectedImage].alt}
               fill
+              quality={75}
               className="absolute inset-0 object-cover"
               sizes="(max-width: 1024px) 100vw, 50vw"
               priority
@@ -174,7 +179,7 @@ function ProductDetails({
                   selectedImage === i ? "border-foreground" : "border-border hover:border-foreground/50",
                 )}
               >
-                <Image src={img.url} alt={img.alt} fill className="object-cover" sizes="96px" />
+                <Image src={getOptimizedCloudinaryUrl(img.url, 200)} loader={isCloudinaryUrl(img.url) ? cloudinaryLoader : undefined} alt={img.alt} fill quality={70} className="object-cover" sizes="96px" />
               </button>
             ))}
           </div>
@@ -293,6 +298,7 @@ function ProductDetails({
                   const result = await addToCart(product._id, 1, activeVariant?._id);
                   if (result.success) {
                     setAdded(true);
+                    notifyCartUpdated();
                   }
                 });
               }}

@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { Upload, X, Loader2, ArrowUp, ArrowDown } from "lucide-react";
+import { getOptimizedCloudinaryUrl } from "@/lib/cloudinary-utils";
 
 export const IMAGE_LABELS = [
   "Front",
@@ -86,7 +87,7 @@ export function ImageUploader({ images, onChange, productTitle = "" }: ImageUplo
       }
 
       const newImage: UploadedImage = {
-        url: uploadData.secure_url,
+        url: getOptimizedCloudinaryUrl(uploadData.secure_url),
         publicId: uploadData.public_id,
         label: selectedLabel,
         alt: `${productTitle || "Product"} — ${selectedLabel}`,

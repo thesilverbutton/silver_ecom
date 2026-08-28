@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { cloudinaryLoader, getOptimizedCloudinaryUrl, isCloudinaryUrl } from "@/lib/cloudinary-utils";
 import { PriceTag } from "@/components/ui/price-tag";
 import { useWishlist } from "@/hooks/use-wishlist";
 
@@ -56,7 +57,8 @@ function ProductCard({
 
         {!imgError && (
           <Image
-            src={image.url}
+            src={getOptimizedCloudinaryUrl(image.url)}
+            loader={isCloudinaryUrl(image.url) ? cloudinaryLoader : undefined}
             alt={image.alt}
             fill
             quality={70}
@@ -72,7 +74,8 @@ function ProductCard({
 
         {secondImage && !secondImgError && !imgError && (
           <Image
-            src={secondImage.url}
+            src={getOptimizedCloudinaryUrl(secondImage.url)}
+            loader={isCloudinaryUrl(secondImage.url) ? cloudinaryLoader : undefined}
             alt={secondImage.alt}
             fill
             quality={70}

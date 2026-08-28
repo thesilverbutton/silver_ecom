@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import Script from "next/script";
 import Image from "next/image";
+import { cloudinaryLoader, getOptimizedCloudinaryUrl, isCloudinaryUrl } from "@/lib/cloudinary-utils";
 import { formatINR } from "@/lib/utils";
 import type { ResolvedCart } from "@/services/cart.service";
 
@@ -368,7 +369,7 @@ function CheckoutClient({ cart, savedAddresses = [], userEmail = "", userPhone =
             {cart.items.map((item) => (
               <div key={`${item.productId}-${item.variantId || ""}`} className="flex gap-3 py-3">
                 <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded bg-muted">
-                  {item.image && <Image src={item.image} alt={item.title} fill className="object-cover" sizes="48px" />}
+                  {item.image && <Image src={getOptimizedCloudinaryUrl(item.image, 96)} loader={isCloudinaryUrl(item.image) ? cloudinaryLoader : undefined} alt={item.title} fill className="object-cover" sizes="48px" />}
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium line-clamp-1">{item.title}</p>

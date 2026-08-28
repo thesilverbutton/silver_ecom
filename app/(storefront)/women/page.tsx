@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description: "Shop handloom fashion for women — sarees, kurtas, dupattas, dresses, and accessories.",
 };
 
+export const revalidate = 60;
+
 export default async function WomenPage() {
   const [result, categories] = await Promise.all([
     getProducts({ gender: "women" }, { limit: 12, sort: "newest" }),

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Truck, MapPin, Clock } from "lucide-react";
 import { getOrderByNumber } from "@/services/order.service";
 import { auth } from "@/lib/auth";
+import { cloudinaryLoader, getOptimizedCloudinaryUrl, isCloudinaryUrl } from "@/lib/cloudinary-utils";
 import { formatINR } from "@/lib/utils";
 import { CancelOrderButton } from "./cancel-button";
 
@@ -97,7 +98,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
           {order.items.map((item, i) => (
             <div key={i} className="flex gap-4 p-4">
               <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded bg-muted">
-                {item.image && <Image src={item.image} alt={item.title} fill className="object-cover" sizes="48px" />}
+                {item.image && <Image src={getOptimizedCloudinaryUrl(item.image, 96)} loader={isCloudinaryUrl(item.image) ? cloudinaryLoader : undefined} alt={item.title} fill className="object-cover" sizes="48px" />}
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">{item.title}</p>

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "Discover the latest handloom fashion additions at The Silver Button.",
 };
 
+export const revalidate = 60;
+
 export default async function NewArrivalsPage() {
   const products = await getNewArrivals(24);
 

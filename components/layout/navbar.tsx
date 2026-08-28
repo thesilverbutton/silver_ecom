@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Search, ShoppingBag, User, Menu, ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { navConfig } from "@/config/site";
+import { useCartCount } from "@/hooks/use-cart-count";
 import { SearchOverlay } from "@/components/search/search-overlay";
 import { SocialLinks } from "./social-links";
 
@@ -24,6 +25,7 @@ interface NavbarProps {
 
 function Navbar({ cartCount = 0, className, navItems }: NavbarProps) {
   const mainNav: readonly NavItem[] = navItems && navItems.length > 0 ? navItems : navConfig.mainNav;
+  const currentCartCount = useCartCount(cartCount);
 
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -145,9 +147,9 @@ function Navbar({ cartCount = 0, className, navItems }: NavbarProps) {
               aria-label="Cart"
             >
               <ShoppingBag className="h-5 w-5" />
-              {cartCount > 0 && (
+              {currentCartCount > 0 && (
                 <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                  {cartCount > 9 ? "9+" : cartCount}
+                  {currentCartCount > 9 ? "9+" : currentCartCount}
                 </span>
               )}
             </Link>

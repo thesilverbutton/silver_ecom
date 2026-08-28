@@ -68,7 +68,7 @@ export async function getProducts(
       .sort(sortOrder)
       .skip(skip)
       .limit(safeLimit)
-      .select("-description -seo -careInstructions -sizeChart")
+      .select("title slug images basePrice compareAtPrice gender fabric isNewArrival isBestSeller stock hasVariants variants categoryId")
       .lean(),
     Product.countDocuments(query),
   ]);

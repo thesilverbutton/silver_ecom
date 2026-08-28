@@ -74,3 +74,15 @@ export async function getCartCount() {
   if (!cartId) return 0;
   return getCartItemCount(cartId);
 }
+
+export async function isProductInCart(productId: string): Promise<boolean> {
+  const cookieStore = await cookies();
+  const cartId = cookieStore.get(CART_COOKIE)?.value;
+  if (!cartId) return false;
+  try {
+    const cart = await getCartService(cartId);
+    return cart.items.some((item) => item.productId === productId);
+  } catch {
+    return false;
+  }
+}

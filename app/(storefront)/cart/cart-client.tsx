@@ -5,7 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { cloudinaryLoader, getOptimizedCloudinaryUrl, isCloudinaryUrl } from "@/lib/cloudinary-utils";
 import { formatINR } from "@/lib/utils";
+import { notifyCartUpdated } from "@/hooks/use-cart-count";
 import {
   getCart,
   updateCartItem,
@@ -28,6 +30,7 @@ function CartPageClient({ initialCart }: CartPageClientProps) {
       await updateCartItem(productId, newQty, variantId);
       const updated = await getCart();
       setCart(updated);
+      notifyCartUpdated();
     });
   };
 
@@ -36,6 +39,7 @@ function CartPageClient({ initialCart }: CartPageClientProps) {
       await removeCartItem(productId, variantId);
       const updated = await getCart();
       setCart(updated);
+      notifyCartUpdated();
     });
   };
 
@@ -44,6 +48,7 @@ function CartPageClient({ initialCart }: CartPageClientProps) {
       await clearCart();
       const updated = await getCart();
       setCart(updated);
+      notifyCartUpdated();
     });
   };
 
@@ -87,7 +92,7 @@ function CartPageClient({ initialCart }: CartPageClientProps) {
             >
               <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-md bg-muted">
                 {item.image && (
-                  <Image src={item.image} alt={item.title} fill className="object-cover" sizes="80px" />
+                  <Image src={getOptimizedCloudinaryUrl(item.image, 160)} loader={isCloudinaryUrl(item.image) ? cloudinaryLoader : undefined} alt={item.title} fill className="object-cover" sizes="80px" />
                 )}
               </div>
 

@@ -1,16 +1,25 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { cookies } from "next/headers";
-import { getProductBySlug, getRelatedProducts } from "@/services/product.service";
+import { getProductBySlug, getRelatedProducts, getProducts } from "@/services/product.service";
 import { getCategoryById } from "@/services/category.service";
-import { getCart as getCartService } from "@/services/cart.service";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ProductCard } from "@/components/product/product-card";
 import { siteConfig } from "@/config/site";
 import { ProductDetails } from "./product-details";
 
+export const revalidate = 60;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  try {
+    const { items } = await getProducts({ status: "active" }, { limit: 60 });
+    return items.map((p: { slug?: string }) => ({ slug: p.slug ?? "" })).filter((p) => Boolean(p.slug));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -34,19 +43,6 @@ export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
-
-  // Check if product is already in cart (read-only, no cookie creation)
-  let isInCart = false;
-  try {
-    const cookieStore = await cookies();
-    const cartId = cookieStore.get("tsb_cart_id")?.value;
-    if (cartId) {
-      const cart = await getCartService(cartId);
-      isInCart = cart.items.some((item) => item.productId === String(product._id));
-    }
-  } catch {
-    // No cart cookie or read failed — isInCart stays false
-  }
 
   const [related, category] = await Promise.all([
     getRelatedProducts(String(product._id), String(product.categoryId), 8),
@@ -106,7 +102,6 @@ export default async function ProductPage({ params }: PageProps) {
 
         <ProductDetails
           product={JSON.parse(JSON.stringify(product))}
-          isInCart={isInCart}
           isSilverButtonShirt={isSilverButtonShirt}
         />
 

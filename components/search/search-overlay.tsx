@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, X, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { cloudinaryLoader, getOptimizedCloudinaryUrl, isCloudinaryUrl } from "@/lib/cloudinary-utils";
 import { formatINR } from "@/lib/utils";
 
 interface SearchResult {
@@ -243,7 +244,8 @@ function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                         <div className="relative h-12 w-9 flex-shrink-0 overflow-hidden rounded bg-foreground">
                           {product.images?.[0]?.url ? (
                             <Image
-                              src={product.images[0].url}
+                              src={getOptimizedCloudinaryUrl(product.images[0].url, 96)}
+                              loader={isCloudinaryUrl(product.images[0].url) ? cloudinaryLoader : undefined}
                               alt={product.images[0].alt || product.title}
                               fill
                               className="object-cover"

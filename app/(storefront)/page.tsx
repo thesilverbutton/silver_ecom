@@ -6,6 +6,8 @@ import { ProductCard } from "@/components/product/product-card";
 import { DraggableHeroImage } from "@/components/home/draggable-hero-image";
 import { ArrowRight } from "lucide-react";
 
+export const revalidate = 60;
+
 const PLACEHOLDER = "https://placehold.co/400x533/e5e7eb/4b5563?text=Product";
 
 /** Mirrors the captions baked into hero_image.png, for legibility on small screens. */

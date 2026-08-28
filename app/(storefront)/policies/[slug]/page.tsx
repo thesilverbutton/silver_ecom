@@ -80,6 +80,10 @@ Last updated: July 2026`,
   },
 };
 
+export function generateStaticParams() {
+  return Object.keys(POLICIES).map((slug) => ({ slug }));
+}
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

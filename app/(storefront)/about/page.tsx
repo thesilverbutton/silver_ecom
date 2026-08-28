@@ -15,9 +15,10 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="relative h-[45vh] min-h-[280px] w-full sm:h-[55vh] sm:min-h-[380px] md:h-[70vh]">
         <Image
-          src="https://res.cloudinary.com/deht0dsks/image/upload/v1785558822/about_page_image_nhlo8n.png"
+          src="https://res.cloudinary.com/deht0dsks/image/upload/f_auto,q_auto/v1785558822/about_page_image_nhlo8n.png"
           alt="The Silver Button — Artisan craftsmanship"
           fill
+          quality={75}
           className="object-cover object-center"
           sizes="100vw"
           priority

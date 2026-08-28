@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Package } from "lucide-react";
 import { getOrdersByEmail } from "@/services/order.service";
 import { auth } from "@/lib/auth";
+import { cloudinaryLoader, getOptimizedCloudinaryUrl, isCloudinaryUrl } from "@/lib/cloudinary-utils";
 import { formatINR } from "@/lib/utils";
 import { redirect } from "next/navigation";
 
@@ -62,7 +63,7 @@ export default async function OrdersPage() {
               {/* First item image */}
               <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded bg-muted">
                 {order.items[0]?.image && (
-                  <Image src={order.items[0].image} alt="" fill className="object-cover" sizes="48px" />
+                  <Image src={getOptimizedCloudinaryUrl(order.items[0].image, 96)} loader={isCloudinaryUrl(order.items[0].image) ? cloudinaryLoader : undefined} alt="" fill className="object-cover" sizes="48px" />
                 )}
               </div>
 
