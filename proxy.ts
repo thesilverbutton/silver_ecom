@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 
 /**
  * Proxy (replaces middleware in Next.js 16).
- * Handles auth gates for /account/* and /admin/*.
+ * Handles auth gates for /account/*, /cart and /admin/*.
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -53,6 +53,15 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // Protect /cart — signed-out visitors are sent to login, then back to the cart
+  if (pathname === "/cart" || pathname.startsWith("/cart/")) {
+    if (!token) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("next", "/cart");
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   // Protect /admin/* — require admin/staff role
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin-login")) {
     if (!token || !["admin", "staff"].includes(token.role as string)) {
@@ -64,5 +73,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/account/:path*", "/admin/:path*"],
+  matcher: ["/account/:path*", "/cart", "/cart/:path*", "/admin/:path*"],
 };

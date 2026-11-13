@@ -46,28 +46,40 @@ export default function AboutPage() {
             <h2 className="font-[family-name:var(--font-serif)] text-2xl font-semibold text-foreground md:text-3xl">
               Our Story
             </h2>
-            <p className="mt-6 text-base leading-relaxed text-muted-foreground">
-              The Silver Button is a luxury textile brand that embodies the historic craftsmanship
-              of rural India. Each creation is a testament to preserving and elevating traditional
-              artistry — fusing age-old techniques with modern elegance.
+            <p className="mt-6 text-base font-semibold leading-relaxed text-foreground">
+              The Silver Button, Woven with patience. Anchored in silver.
             </p>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              Born from a homegrown vision and a shared respect for the past, our design language
-              breathes new life into vintage textile collections, heirlooms, and the stories they
-              carry.
+              True luxury does not clamor for attention. It reveals itself in the quiet
+              details—the grain of a traditional weave, the weight of cool metal against the
+              fingertip, and the deliberate slowness of an artisan&apos;s hand.
+            </p>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+              The Silver Button an intentional collision between heritage handlooms and
+              traditional silversmithing.
             </p>
           </div>
           <div>
             <h2 className="font-[family-name:var(--font-serif)] text-2xl font-semibold text-foreground md:text-3xl">
               What We Do
             </h2>
-            <p className="mt-6 text-base leading-relaxed text-muted-foreground">
-              We specialize in innovative textile curation, intricate calligraphic embroideries, and
-              repurposing character-rich materials into contemporary, wearable art.
+            <p className="mt-6 text-base font-semibold leading-relaxed text-foreground">
+              We make shirts meant to be worn, remembered, and passed down.
             </p>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              We collaborate closely with artisan clusters across India&apos;s craft regions —
-              celebrating patchwork, quilting, hand-embroidery, block prints, and fine beadwork.
+              At The Silver Button, we believe luxury is found where patience meets purpose.
+            </p>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+              We design premium handloom linen shirts, cut to a modern silhouette and finished with
+              handcrafted silver buttons cast and detailed by master artisans.
+            </p>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+              In an era of fleeting trends and synthetic compromises, we return to the enduring
+              dignity of raw craft: pure, breathing weave paired with the weight and luster of
+              genuine silver.
+            </p>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+              Every stitch honors provenance; every button tells a story of enduring elegance.
             </p>
           </div>
         </div>
@@ -75,8 +87,8 @@ export default function AboutPage() {
         {/* Statement */}
         <div className="mt-12 border-y border-border py-8 text-center md:mt-24 md:py-14">
           <p className="mx-auto max-w-3xl font-[family-name:var(--font-serif)] text-base font-medium leading-relaxed text-foreground sm:text-lg md:text-xl">
-            The Silver Button is more than a label — it is a symbol of cultural continuity,
-            fastening the beauty of the past to the sophistication of the present.
+            The Silver Button an intentional collision between heritage handlooms and
+            traditional silversmithing.
           </p>
         </div>
       </section>

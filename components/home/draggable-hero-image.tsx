@@ -105,14 +105,14 @@ function DraggableHeroImage() {
       >
         <Image
           src="/hero_image.webp"
-          alt="The craft journey: farming, fibre preparation, hand weaving, handcrafting, silver craftsmanship and the finished garment"
-          width={1774}
-          height={887}
+          alt="The craft journey: hand weaving, handcrafting, silver craftsmanship and the finished garment"
+          width={1801}
+          height={873}
           priority
-          quality={70}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1200px"
+          quality={75}
+          sizes="(max-width: 640px) 180vw, (max-width: 1024px) 130vw, 1200px"
           draggable={false}
-          className="h-auto w-[180%] max-w-none sm:w-[150%] lg:w-[120%]"
+          className="mx-auto h-auto w-[180%] max-w-none sm:w-[130%] lg:w-full lg:max-w-[1200px]"
         />
       </div>
 

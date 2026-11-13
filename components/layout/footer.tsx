@@ -22,7 +22,8 @@ function Footer({ navItems }: FooterProps) {
             The Silver Button
           </span>
           <p className="max-w-sm text-sm text-muted-foreground md:pr-4">
-            Crafting Heritage, Sustaining Artistry. Woven with purpose and made to last.
+            The Silver Button an intentional collision between heritage handlooms and
+            traditional silversmithing.
           </p>
         </div>
 

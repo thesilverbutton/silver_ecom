@@ -10,19 +10,21 @@ export const revalidate = 60;
 
 const PLACEHOLDER = "https://placehold.co/400x533/e5e7eb/4b5563?text=Product";
 
-/** Mirrors the captions baked into hero_image.png, for legibility on small screens. */
+/**
+ * Mirrors the captions baked into hero_image.webp, for legibility on small screens.
+ * The artwork keeps its original step numbers (03–06) after Farming and Fibre
+ * Preparation were removed.
+ */
 const CRAFT_STEPS = [
-  "Farming",
-  "Fibre Preparation",
-  "Hand Weaving",
-  "Handcrafted",
-  "Silver Craftsmanship",
-  "Timeless Creation",
+  { number: 3, label: "Hand Weaving" },
+  { number: 4, label: "Handcrafted" },
+  { number: 5, label: "Silver Craftsmanship" },
+  { number: 6, label: "Timeless Creation" },
 ] as const;
 
+/** Homepage category chips — only Men's Linen Shirts are surfaced for now. */
 const CATEGORY_GROUPS = [
-  { label: "Men", prefix: "men-", base: "/men" },
-  { label: "Women", prefix: "women-", base: "/women" },
+  { label: "Men", prefix: "men-", base: "/men", only: ["men-linen-shirts"] },
 ] as const;
 
 export default async function HomePage() {
@@ -59,13 +61,13 @@ export default async function HomePage() {
         <DraggableHeroImage />
 
         <ol className="mx-auto grid max-w-md grid-cols-2 gap-x-4 gap-y-3 px-5 pt-6 sm:max-w-2xl sm:grid-cols-3 md:hidden">
-          {CRAFT_STEPS.map((step, i) => (
-            <li key={step} className="flex items-baseline gap-2">
+          {CRAFT_STEPS.map((step) => (
+            <li key={step.label} className="flex items-baseline gap-2">
               <span className="text-[10px] font-semibold tabular-nums text-[#736350]">
-                {String(i + 1).padStart(2, "0")}
+                {String(step.number).padStart(2, "0")}
               </span>
               <span className="text-[11px] font-medium uppercase leading-tight tracking-[0.06em] text-[#4F4232]">
-                {step}
+                {step.label}
               </span>
             </li>
           ))}
@@ -83,15 +85,17 @@ export default async function HomePage() {
       </section>
 
       {/* Category chips — grouped by gender */}
-      <section className="mx-auto max-w-[1280px] px-5 py-10 md:px-16 md:py-14">
-        <div className="grid gap-8 md:grid-cols-2 md:gap-12">
+      <section className="mx-auto max-w-[1280px] px-5 py-6 md:px-16 md:py-8">
+        <div className="grid gap-8">
           {CATEGORY_GROUPS.map((group) => {
-            const cats = allCategories.filter((cat) => cat.slug.startsWith(group.prefix));
+            const cats = allCategories.filter((cat) =>
+              (group.only as readonly string[]).includes(cat.slug),
+            );
             if (cats.length === 0) return null;
 
             return (
               <div key={group.label}>
-                <div className="flex items-baseline justify-between">
+                <div className="flex items-baseline gap-4">
                   <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                     {group.label}
                   </h2>
@@ -127,7 +131,7 @@ export default async function HomePage() {
 
       {/* Featured Products */}
       {featured.length > 0 && (
-        <section className="mx-auto max-w-[1280px] px-5 py-12 md:px-16 md:py-24">
+        <section className="mx-auto max-w-[1280px] px-5 pb-12 pt-6 md:px-16 md:pb-24 md:pt-10">
           <div className="mb-6 flex items-end justify-between gap-4 md:mb-10">
             <h2 className="font-[family-name:var(--font-serif)] text-xl font-semibold text-foreground sm:text-2xl md:text-3xl">
               Featured

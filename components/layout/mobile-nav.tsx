@@ -22,17 +22,26 @@ function MobileNav() {
     >
       <div className="flex h-16 items-center justify-around">
         {tabs.map((tab) => {
-          const isActive = tab.match(pathname);
+          const isActive = tab.match(pathname ?? "/");
           const Icon = tab.icon;
 
           return (
             <Link
               key={tab.href}
               href={tab.href}
+              aria-current={isActive ? "page" : undefined}
+              // Tapping Home while already on the homepage scrolls back to the top
+              // (a plain <Link> to the current URL does nothing once you've scrolled).
+              onClick={(event) => {
+                if (tab.href === "/" && pathname === "/") {
+                  event.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
               className={cn(
                 "flex w-full flex-col items-center justify-center h-full border-t-2 pt-1 transition-colors",
                 isActive
-                  ? "border-primary text-foreground"
+                  ? "border-primary bg-secondary/60 text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground",
               )}
             >

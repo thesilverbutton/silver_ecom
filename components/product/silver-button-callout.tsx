@@ -44,7 +44,6 @@ const DELAY = {
   calloutTitle: 480,
   rule: 560,
   calloutBody: 620,
-  legacy: 780,
   bottomLeft: 900,
   bottomRight: 960,
 } as const;
@@ -52,11 +51,6 @@ const DELAY = {
 const CALLOUT_BODY = [
   "Hand-forged, custom-engraved,",
   "and set by master silversmiths.",
-] as const;
-
-const LEGACY_LINES = [
-  "A legacy connecting Bhagalpuri weavers and master silversmiths.",
-  "Unmatched Bhagalpuri linen. Timeless texture.",
 ] as const;
 
 /**
@@ -286,21 +280,6 @@ function SilverButtonCallout({ className }: SilverButtonCalloutProps) {
             })}
           </div>
         </div>
-
-        <div className="mt-6 hidden space-y-2 md:block">
-          {LEGACY_LINES.map((line, i) => {
-            const r = reveal(open, DELAY.legacy + i * 80);
-            return (
-              <p
-                key={line}
-                style={r.style}
-                className={cn(r.className, SHADOW, "text-[11px] leading-snug text-white/85")}
-              >
-                {line}
-              </p>
-            );
-          })}
-        </div>
       </div>
 
       {/* ---- Brand lockup: bottom bar ---- */}
@@ -346,8 +325,7 @@ function SilverButtonCallout({ className }: SilverButtonCalloutProps) {
       {/* Screen readers get the same information as prose, once. */}
       <p className="sr-only">
         Finished with solid 925 sterling silver buttons — hand-forged, custom-engraved, and set by
-        master silversmiths. A legacy connecting Bhagalpuri weavers and master silversmiths, on
-        unmatched Bhagalpuri linen.
+        master silversmiths.
       </p>
     </div>
   );

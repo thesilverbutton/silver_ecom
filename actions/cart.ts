@@ -36,7 +36,11 @@ async function getOrCreateCartId(): Promise<string> {
 }
 
 export async function getCart() {
-  const cartId = await getOrCreateCartId();
+  // Read-only: this is called while rendering the cart page, where Next.js forbids
+  // setting cookies. A visitor with no cart cookie simply has an empty cart; the
+  // cookie is created by the mutating actions below (which run as server actions).
+  const cookieStore = await cookies();
+  const cartId = cookieStore.get(CART_COOKIE)?.value;
   return getCartService(cartId);
 }
 
